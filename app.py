@@ -9,7 +9,7 @@ from requests.api import get
 from rich.console import Console
 console = Console()
 
-access_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3N1ZXIiOiJoYWNrc3RyYXAiLCJhdWRpZW5jZSI6Imh0dHBzOi8vaGFja3N0cmFwLmNvbSIsImFsZ29yaXRobXMiOlsiSFMyNTYiXSwiY2xhaW1zIjp7Im9yZyI6ImhhY2tzdHJhcCJ9LCJpYXQiOjE2MjQ3MDM0MDh9.bucqSg6pMXsag5wsHBSucUjl3rtCAZV9pKasC-M_04k"
+access_token = ""
 base_url = 'https://blink.hackstrap.com/'
 
 app = Flask(__name__)
