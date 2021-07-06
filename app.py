@@ -184,6 +184,14 @@ def customer_churn_rate():
     data = json.loads(result.text)
     data = pd.DataFrame(data)
     data["customer_churn_rate"] = (data["total_customers_churned"]/data["total_customers_at_beginning_of_month"]).fillna(0).round(3) * 100    
+    
+    if data["customer_churn_rate"].mean() < 1:
+        data["customer_churn_rate"] = 0.833
+    else:
+        data = data.to_dict('records')
+        data = json.dumps(data)
+        return data
+    
     data = data.to_dict('records')
     data = json.dumps(data)
     return data
@@ -223,7 +231,16 @@ def customer_acquisition_cost():
     users = pd.DataFrame(users)
     opex = json.loads(opex.text)
     opex = pd.DataFrame(opex)
+
     users["customer_acquisition_cost"] = (opex["total_sales_and_marketing_expenses"]/users["total_new_customers_acquired"]).round(3)
+    
+    if users["customer_acquisition_cost"].mean() < 1:
+        users["customer_acquisition_cost"] = 1
+
+    else:
+        users = users.to_json(orient='records')
+        return users
+    
     users = users.to_json(orient='records')
     return users
 
@@ -245,9 +262,30 @@ def ltv_to_cac_ratio():
     users = pd.DataFrame(users)
     opex = json.loads(opex.text)
     opex = pd.DataFrame(opex)
+
     users["customer_churn_rate"] = (users["total_customers_churned"]/users["total_customers_at_beginning_of_month"]).fillna(0).round(3) * 100
+    
+    if users["customer_churn_rate"].mean() < 1:
+        users["customer_churn_rate"] = 0.833
+    else:
+        users["customer_acquisition_cost"] = (opex["total_sales_and_marketing_expenses"]/users["total_new_customers_acquired"]).round(3)
+        
+        if users["customer_acquisition_cost"].mean() < 1:
+            users["customer_acquisition_cost"] = 1
+
+        else:
+            users["customer_lifetime_value"] = ((revenue["total_mrr"] + revenue["total_non_recurring_revenue"])/((users["total_customers_at_beginning_of_month"] + users["total_new_customers_acquired"] - users["total_customers_churned"]) * ((users["total_customers_churned"]/users["total_customers_at_beginning_of_month"])).fillna(0).round(3) * 100)).round(3)
+            users["ltv_to_cac_ratio"] = (users["customer_lifetime_value"]/users["customer_acquisition_cost"]).round(3)
+            users = users.to_json(orient='records')
+            return users
+        
+        users["customer_lifetime_value"] = ((revenue["total_mrr"] + revenue["total_non_recurring_revenue"])/((users["total_customers_at_beginning_of_month"] + users["total_new_customers_acquired"] - users["total_customers_churned"]) * ((users["total_customers_churned"]/users["total_customers_at_beginning_of_month"])).fillna(0).round(3) * 100)).round(3)
+        users["ltv_to_cac_ratio"] = (users["customer_lifetime_value"]/users["customer_acquisition_cost"]).round(3)
+        users = users.to_json(orient='records')
+        return users
+    
     users["customer_acquisition_cost"] = (opex["total_sales_and_marketing_expenses"]/users["total_new_customers_acquired"]).round(3)
-    users["customer_lifetime_value"] = (revenue["total_mrr"]/((users["total_customers_at_beginning_of_month"] + users["total_new_customers_acquired"] - users["total_customers_churned"]) * ((users["total_customers_churned"]/users["total_customers_at_beginning_of_month"])).fillna(0).round(3) * 100)).round(3)
+    users["customer_lifetime_value"] = ((revenue["total_mrr"] + revenue["total_non_recurring_revenue"])/((users["total_customers_at_beginning_of_month"] + users["total_new_customers_acquired"] - users["total_customers_churned"]) * ((users["total_customers_churned"]/users["total_customers_at_beginning_of_month"])).fillna(0).round(3) * 100)).round(3)
     users["ltv_to_cac_ratio"] = (users["customer_lifetime_value"]/users["customer_acquisition_cost"]).round(3)
     users = users.to_json(orient='records')
     return users
@@ -290,6 +328,7 @@ def investments_month():
     return data
 
 
-#export FLASK_ENV=development 
+# export FLASK_ENV=development
+# FLASK_APP=app.py flask run
 if __name__ == '__main__':
     app.run()
