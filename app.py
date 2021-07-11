@@ -9,7 +9,6 @@ from requests.api import get
 from rich.console import Console
 console = Console()
 
-access_token = ""
 base_url = 'https://blink.hackstrap.com/'
 
 app = Flask(__name__)
@@ -31,33 +30,44 @@ def v1():
 
 @app.route('/unity/v1/total_revenue', methods=['GET'])
 def total_revenue():
+    page = request.args.get('page')
+    page_size = request.args.get('page_size')
+    startup_id = request.args.get('startup_id') 
+    year = request.args.get('year')
+    access_token = request.args.get('access_token')
+   
     try:
-        response = requests.get(base_url + "v1/revenue/?page=0&page_size=12",
-      headers={'Content-Type':'application/json',
+        result = requests.get(base_url + "v1/revenue?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
+            headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
-
+            
         # If the response was successful, no Exception will be raised
-        response.raise_for_status()
+        result.raise_for_status()
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')  
     except Exception as err:
         print(f'Other error occurred: {err}')  
     else:
         print('Success!')
-    result = requests.get(base_url + "v1/revenue/?page=0&page_size=12",
+    result = requests.get(base_url + "v1/revenue?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
     data = json.loads(result.text)
     data = pd.DataFrame(data)
     data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
     data = data.to_dict('records')
-    #console.log(json.dumps(data), log_locals=True)
     data = json.dumps(data)
     return data
 
 @app.route('/unity/v1/total_revenue_gr', methods=['GET'])
 def total_revenue_gr():
-    result = requests.get(base_url + "v1/revenue/?page=0&page_size=12",
+    page = request.args.get('page')
+    page_size = request.args.get('page_size')
+    startup_id = request.args.get('startup_id') 
+    year = request.args.get('year')
+    access_token = request.args.get('access_token')
+
+    result = requests.get(base_url + "v1/revenue?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
     data = json.loads(result.text)
@@ -71,7 +81,13 @@ def total_revenue_gr():
 
 @app.route('/unity/v1/total_mrr_gr', methods=['GET'])
 def total_mrr_gr():
-    result = requests.get(base_url + "v1/revenue/?page=0&page_size=12",
+    page = request.args.get('page')
+    page_size = request.args.get('page_size')
+    startup_id = request.args.get('startup_id') 
+    year = request.args.get('year')
+    access_token = request.args.get('access_token')
+
+    result = requests.get(base_url + "v1/revenue?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
     data = json.loads(result.text)
@@ -84,7 +100,13 @@ def total_mrr_gr():
 
 @app.route('/unity/v1/total_customer_support_expenses', methods=['GET'])
 def total_customer_support_expenses():
-    result = requests.get(base_url + "v1/expense/?page=0&page_size=12",
+    page = request.args.get('page')
+    page_size = request.args.get('page_size')
+    startup_id = request.args.get('startup_id') 
+    year = request.args.get('year')
+    access_token = request.args.get('access_token')
+
+    result = requests.get(base_url + "v1/expense?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
     data = json.loads(result.text)
@@ -97,7 +119,13 @@ def total_customer_support_expenses():
 
 @app.route('/unity/v1/total_service_delivery_expenses', methods=['GET'])
 def total_service_delivery_expenses():
-    result = requests.get(base_url + "v1/expense/?page=0&page_size=12",
+    page = request.args.get('page')
+    page_size = request.args.get('page_size')
+    startup_id = request.args.get('startup_id') 
+    year = request.args.get('year')
+    access_token = request.args.get('access_token')
+
+    result = requests.get(base_url + "v1/expense?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
     data = json.loads(result.text)
@@ -110,7 +138,13 @@ def total_service_delivery_expenses():
 
 @app.route('/unity/v1/total_cost_of_goods_manufactured', methods=['GET'])
 def total_cost_of_goods_manufactured():
-    result = requests.get(base_url + "v1/expense/?page=0&page_size=12",
+    page = request.args.get('page')
+    page_size = request.args.get('page_size')
+    startup_id = request.args.get('startup_id') 
+    year = request.args.get('year')
+    access_token = request.args.get('access_token')
+
+    result = requests.get(base_url + "v1/expense?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
     data = json.loads(result.text)
@@ -123,7 +157,13 @@ def total_cost_of_goods_manufactured():
 
 @app.route('/unity/v1/total_cogs', methods=['GET'])
 def total_cogs():
-    result = requests.get(base_url + "v1/expense/?page=0&page_size=12",
+    page = request.args.get('page')
+    page_size = request.args.get('page_size')
+    startup_id = request.args.get('startup_id') 
+    year = request.args.get('year')
+    access_token = request.args.get('access_token')
+
+    result = requests.get(base_url + "v1/expense?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
     data = json.loads(result.text)
@@ -139,7 +179,13 @@ def total_cogs():
 
 @app.route('/unity/v1/total_opex_expenses', methods=['GET'])
 def total_opex_expenses():
-    result = requests.get(base_url + "v1/opex/?page=0&page_size=12",
+    page = request.args.get('page')
+    page_size = request.args.get('page_size')
+    startup_id = request.args.get('startup_id') 
+    year = request.args.get('year')
+    access_token = request.args.get('access_token')
+
+    result = requests.get(base_url + "v1/opex?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
     data = json.loads(result.text)
@@ -152,7 +198,13 @@ def total_opex_expenses():
 
 @app.route('/unity/v1/total_customers', methods=['GET'])
 def total_customers():
-    result = requests.get(base_url + "v1/users/?page=0&page_size=12",
+    page = request.args.get('page')
+    page_size = request.args.get('page_size')
+    startup_id = request.args.get('startup_id') 
+    year = request.args.get('year')
+    access_token = request.args.get('access_token')
+
+    result = requests.get(base_url + "v1/users?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
     data = json.loads(result.text)
@@ -165,7 +217,13 @@ def total_customers():
 
 @app.route('/unity/v1/total_monthly_active_users_gr', methods=['GET'])
 def total_monthly_active_users_gr():
-    result = requests.get(base_url + "v1/users/?page=0&page_size=12",
+    page = request.args.get('page')
+    page_size = request.args.get('page_size')
+    startup_id = request.args.get('startup_id') 
+    year = request.args.get('year')
+    access_token = request.args.get('access_token')
+
+    result = requests.get(base_url + "v1/users?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
     data = json.loads(result.text)
@@ -178,7 +236,13 @@ def total_monthly_active_users_gr():
 
 @app.route('/unity/v1/customer_churn_rate', methods=['GET'])
 def customer_churn_rate():
-    result = requests.get(base_url + "v1/users/?page=0&page_size=12",
+    page = request.args.get('page')
+    page_size = request.args.get('page_size')
+    startup_id = request.args.get('startup_id') 
+    year = request.args.get('year')
+    access_token = request.args.get('access_token')
+
+    result = requests.get(base_url + "v1/users?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
     data = json.loads(result.text)
@@ -199,10 +263,16 @@ def customer_churn_rate():
 
 @app.route('/unity/v1/gross_profit_margin', methods=['GET'])
 def gross_profit_margin():
-    revenue = requests.get(base_url + "v1/revenue/?page=0&page_size=12",
+    page = request.args.get('page')
+    page_size = request.args.get('page_size')
+    startup_id = request.args.get('startup_id') 
+    year = request.args.get('year')
+    access_token = request.args.get('access_token')
+
+    revenue = requests.get(base_url + "v1/revenue?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
-    expense = requests.get(base_url + "v1/expense/?page=0&page_size=12",
+    expense = requests.get(base_url + "v1/expense?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
     revenue = json.loads(revenue.text)
@@ -221,10 +291,16 @@ def gross_profit_margin():
 
 @app.route('/unity/v1/customer_acquisition_cost', methods=['GET'])
 def customer_acquisition_cost():
-    users = requests.get(base_url + "v1/users/?page=0&page_size=12",
+    page = request.args.get('page')
+    page_size = request.args.get('page_size')
+    startup_id = request.args.get('startup_id') 
+    year = request.args.get('year')
+    access_token = request.args.get('access_token')
+
+    users = requests.get(base_url + "v1/users?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
-    opex = requests.get(base_url + "v1/opex/?page=0&page_size=12",
+    opex = requests.get(base_url + "v1/opex?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
     users = json.loads(users.text)
@@ -247,13 +323,19 @@ def customer_acquisition_cost():
 
 @app.route('/unity/v1/ltv_to_cac_ratio', methods=['GET'])
 def ltv_to_cac_ratio():
-    revenue = requests.get(base_url + "v1/revenue/?page=0&page_size=12",
+    page = request.args.get('page')
+    page_size = request.args.get('page_size')
+    startup_id = request.args.get('startup_id') 
+    year = request.args.get('year')
+    access_token = request.args.get('access_token')
+
+    revenue = requests.get(base_url + "v1/revenue?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
-    users = requests.get(base_url + "v1/users/?page=0&page_size=12",
+    users = requests.get(base_url + "v1/users?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
-    opex = requests.get(base_url + "v1/opex/?page=0&page_size=12",
+    opex = requests.get(base_url + "v1/opex?" + "page={}&page_size={}&startup_id={}&year={}".format(page, page_size, startup_id, year),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
     revenue = json.loads(revenue.text)
@@ -293,9 +375,23 @@ def ltv_to_cac_ratio():
 
 @app.route('/unity/v1/investment_total', methods=['GET'])
 def investment_total():
-    result = requests.get(base_url + "v1/investment/?page=0&page_size=12",
+    page = request.args.get('page')
+    page_size = request.args.get('page_size')
+    investor_id = request.args.get('investor_id') 
+    year = request.args.get('year')
+    print(year)
+    access_token = request.args.get('access_token')
+
+    if year == None :
+        result = requests.get(base_url + "v1/investment?" + "page={}&page_size={}&investor_id={}".format(page, page_size, investor_id),
       headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
+         
+    else :
+        result = requests.get(base_url + "v1/investment?" + "page={}&page_size={}&investor_id={}&year={}".format(page, page_size, investor_id, year),
+      headers={'Content-Type':'application/json',
+               'Authorization': 'Bearer {}'.format(access_token)})
+          
     data = json.loads(result.text)
     data = pd.DataFrame(data)
     data = pd.DataFrame(data.groupby(by=['investor_id'])['amount'].sum())
@@ -306,9 +402,22 @@ def investment_total():
 
 @app.route('/unity/v1/startups_invested', methods=['GET'])
 def startups_invested():
-    result = requests.get(base_url + "v1/investment/?page=0&page_size=30",
-        headers={'Content-Type':'application/json',
+    page = request.args.get('page')
+    page_size = request.args.get('page_size')
+    investor_id = request.args.get('investor_id') 
+    year = request.args.get('year')
+    access_token = request.args.get('access_token')
+
+    if year == None :
+        result = requests.get(base_url + "v1/investment?" + "page={}&page_size={}&investor_id={}".format(page, page_size, investor_id),
+      headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
+         
+    else :
+        result = requests.get(base_url + "v1/investment?" + "page={}&page_size={}&investor_id={}&year={}".format(page, page_size, investor_id, year),
+      headers={'Content-Type':'application/json',
+               'Authorization': 'Bearer {}'.format(access_token)})
+
     data = json.loads(result.text)
     data = pd.DataFrame(data)
     data = data.groupby(by=['investor_id'])["startup_id"].unique()
@@ -318,9 +427,22 @@ def startups_invested():
 
 @app.route('/unity/v1/investments_month', methods=['GET'])
 def investments_month():
-    result = requests.get(base_url + "v1/investment/?page=0&page_size=30",
-        headers={'Content-Type':'application/json',
+    page = request.args.get('page')
+    page_size = request.args.get('page_size')
+    investor_id = request.args.get('investor_id') 
+    year = request.args.get('year')
+    access_token = request.args.get('access_token')
+
+    if year == None :
+        result = requests.get(base_url + "v1/investment?" + "page={}&page_size={}&investor_id={}".format(page, page_size, investor_id),
+      headers={'Content-Type':'application/json',
                'Authorization': 'Bearer {}'.format(access_token)})
+         
+    else :
+        result = requests.get(base_url + "v1/investment?" + "page={}&page_size={}&investor_id={}&year={}".format(page, page_size, investor_id, year),
+      headers={'Content-Type':'application/json',
+               'Authorization': 'Bearer {}'.format(access_token)})
+               
     data = json.loads(result.text)
     data = pd.DataFrame(data)
     data = data.groupby(by=['investor_id','year','month'])['amount'].sum()
