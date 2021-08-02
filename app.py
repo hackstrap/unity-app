@@ -13,14 +13,16 @@ console = Console()
 
 base_url = "https://blink.hackstrap.com/"
 
-PREFIX = 'Bearer'
+PREFIX = "Bearer"
+
 
 def get_token(header):
-    bearer, _, token = header.partition(' ')
+    bearer, _, token = header.partition(" ")
     if bearer != PREFIX:
-        raise ValueError('Invalid token')
+        raise ValueError("Invalid token")
 
     return token
+
 
 app = Flask(__name__)
 
@@ -48,9 +50,8 @@ def total_revenue():
     year = request.args.get("year")
     header = request.headers.get("Authorization")
     access_token = get_token(header)
-    
+
     request_base_url = request.base_url
-  
 
     try:
         result = requests.get(
@@ -873,7 +874,7 @@ def investments_month():
     data = data.reset_index().to_json(orient="records")
     return data
 
-
+#LASK_DEBUG=1 FLASK_APP=app.py flask run 
 # python3 -m flask run
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
