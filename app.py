@@ -13,6 +13,15 @@ console = Console()
 
 base_url = "https://blink.hackstrap.com/"
 
+PREFIX = 'Bearer'
+
+def get_token(header):
+    bearer, _, token = header.partition(' ')
+    if bearer != PREFIX:
+        raise ValueError('Invalid token')
+
+    return token
+
 app = Flask(__name__)
 
 
@@ -37,7 +46,11 @@ def total_revenue():
     page_size = request.args.get("page_size")
     startup_id = request.args.get("startup_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
+    
+    request_base_url = request.base_url
+  
 
     try:
         result = requests.get(
@@ -71,6 +84,7 @@ def total_revenue():
             "Authorization": "Bearer {}".format(access_token),
         },
     )
+
     data = json.loads(result.text)
     data = pd.DataFrame(data)
     data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
@@ -85,7 +99,8 @@ def total_revenue_gr():
     page_size = request.args.get("page_size")
     startup_id = request.args.get("startup_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     result = requests.get(
         base_url
@@ -115,7 +130,8 @@ def total_mrr_gr():
     page_size = request.args.get("page_size")
     startup_id = request.args.get("startup_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     result = requests.get(
         base_url
@@ -142,7 +158,8 @@ def total_customer_support_expenses():
     page_size = request.args.get("page_size")
     startup_id = request.args.get("startup_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     result = requests.get(
         base_url
@@ -171,7 +188,8 @@ def total_service_delivery_expenses():
     page_size = request.args.get("page_size")
     startup_id = request.args.get("startup_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     result = requests.get(
         base_url
@@ -198,7 +216,8 @@ def total_cost_of_goods_manufactured():
     page_size = request.args.get("page_size")
     startup_id = request.args.get("startup_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     result = requests.get(
         base_url
@@ -230,7 +249,8 @@ def total_cogs():
     page_size = request.args.get("page_size")
     startup_id = request.args.get("startup_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     result = requests.get(
         base_url
@@ -271,7 +291,8 @@ def total_opex_expenses():
     page_size = request.args.get("page_size")
     startup_id = request.args.get("startup_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     result = requests.get(
         base_url
@@ -302,7 +323,8 @@ def total_customers():
     page_size = request.args.get("page_size")
     startup_id = request.args.get("startup_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     result = requests.get(
         base_url
@@ -333,7 +355,8 @@ def total_monthly_active_users_gr():
     page_size = request.args.get("page_size")
     startup_id = request.args.get("startup_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     result = requests.get(
         base_url
@@ -362,7 +385,8 @@ def customer_churn_rate():
     page_size = request.args.get("page_size")
     startup_id = request.args.get("startup_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     result = requests.get(
         base_url
@@ -399,7 +423,8 @@ def gross_profit_margin():
     page_size = request.args.get("page_size")
     startup_id = request.args.get("startup_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     revenue = requests.get(
         base_url
@@ -458,7 +483,8 @@ def customer_acquisition_cost():
     page_size = request.args.get("page_size")
     startup_id = request.args.get("startup_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     users = requests.get(
         base_url
@@ -509,7 +535,8 @@ def ltv_to_cac_ratio():
     page_size = request.args.get("page_size")
     startup_id = request.args.get("startup_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     revenue = requests.get(
         base_url
@@ -653,7 +680,8 @@ def investment_summary():
     page = request.args.get("page")
     page_size = request.args.get("page_size")
     investor_id = request.args.get("investor_id")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     result = requests.get(
         base_url
@@ -668,7 +696,6 @@ def investment_summary():
     data = json.loads(result.text)
 
     data = data[0]
-    print(type(data))
     data = data["investment_summary"][0]
     # data = data['investment_summary']
     return data
@@ -680,7 +707,8 @@ def investment_total():
     page_size = request.args.get("page_size")
     investor_id = request.args.get("investor_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     if year == None:
         result = requests.get(
@@ -722,7 +750,8 @@ def startups_invested():
     page_size = request.args.get("page_size")
     investor_id = request.args.get("investor_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     if year == None:
         result = requests.get(
@@ -763,7 +792,8 @@ def investor_startups():
     page_size = request.args.get("page_size")
     investor_id = request.args.get("investor_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     result = requests.get(
         base_url
@@ -808,7 +838,8 @@ def investments_month():
     page_size = request.args.get("page_size")
     investor_id = request.args.get("investor_id")
     year = request.args.get("year")
-    access_token = request.args.get("access_token")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
 
     if year == None:
         result = requests.get(
@@ -845,4 +876,4 @@ def investments_month():
 
 # python3 -m flask run
 if __name__ == "__main__":
-    app.run(host ='0.0.0.0')
+    app.run()
