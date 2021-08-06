@@ -80,6 +80,7 @@ def revenue():
             data["total_revenue"].pct_change().fillna(0).round(3) * 100
             )
         data["total_mrr_gr"] = data["total_mrr"].pct_change().fillna(0).round(3) * 100
+        data = data.round(4)
         data = data.to_dict("records")
         data = json.dumps(data)
         return data
