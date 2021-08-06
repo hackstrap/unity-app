@@ -10,6 +10,7 @@ from requests.exceptions import HTTPError
 from rich.console import Console
 console = Console()
 
+from tables.revenue import tables_revenue
 
 
 
@@ -31,7 +32,6 @@ def get_token(header):
 
 app = Flask(__name__)
 
-from tables.revenue import tables_revenue
     
 app.register_blueprint(tables_revenue)
 
