@@ -8,8 +8,11 @@ from flask import Flask, jsonify, request
 from requests.api import get
 from requests.exceptions import HTTPError
 from rich.console import Console
-
 console = Console()
+
+
+
+
 
 base_url = "https://blink.hackstrap.com/"
 
@@ -24,12 +27,22 @@ def get_token(header):
     return token
 
 
+
+
 app = Flask(__name__)
+
+from tables.revenue import tables_revenue
+    
+app.register_blueprint(tables_revenue)
+
+
+
+
 
 
 @app.route("/")
 def hello_world():
-    return "Hello, Docker!"
+    return "Hello, World!"
 
 
 @app.route("/unity")
@@ -86,12 +99,15 @@ def total_revenue():
         },
     )
 
-    data = json.loads(result.text)
-    data = pd.DataFrame(data)
-    data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
-    data = data.to_dict("records")
-    data = json.dumps(data)
-    return data
+    if result.text == "[]":
+        return jsonify([])
+    else:
+        data = json.loads(result.text)
+        data = pd.DataFrame(data)
+        data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
+        data = data.to_dict("records")
+        data = json.dumps(data)
+        return data
 
 
 @app.route("/unity/v1/total_revenue_gr", methods=["GET"])
@@ -114,15 +130,19 @@ def total_revenue_gr():
             "Authorization": "Bearer {}".format(access_token),
         },
     )
-    data = json.loads(result.text)
-    data = pd.DataFrame(data)
-    data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
-    data["total_revenue_gr"] = (
-        data["total_revenue"].pct_change().fillna(0).round(3) * 100
-    )
-    data = data.to_dict("records")
-    data = json.dumps(data)
-    return data
+
+    if result.text == "[]":
+        return jsonify([])
+    else:
+        data = json.loads(result.text)
+        data = pd.DataFrame(data)
+        data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
+        data["total_revenue_gr"] = (
+            data["total_revenue"].pct_change().fillna(0).round(3) * 100
+            )
+        data = data.to_dict("records")
+        data = json.dumps(data)
+        return data
 
 
 @app.route("/unity/v1/total_mrr_gr", methods=["GET"])
@@ -874,7 +894,8 @@ def investments_month():
     data = data.reset_index().to_json(orient="records")
     return data
 
-#LASK_DEBUG=1 FLASK_APP=app.py flask run 
+
+# FLASK_DEBUG=1 FLASK_APP=app.py flask run
 # python3 -m flask run
 if __name__ == "__main__":
-    app.run(host="0.0.0.0",debug=True)
+    app.run(host="0.0.0.0", debug=True)
