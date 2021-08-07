@@ -11,6 +11,12 @@ from rich.console import Console
 console = Console()
 
 from tables.revenue import tables_revenue
+from tables.expenses import tables_expenses
+from tables.users import tables_users
+
+from investor.investor import investor_investment_summary
+
+from startups.tyke.test import test_rev
 
 
 
@@ -34,10 +40,12 @@ app = Flask(__name__)
 
     
 app.register_blueprint(tables_revenue)
+app.register_blueprint(tables_expenses)
+app.register_blueprint(tables_users)
 
+app.register_blueprint(investor_investment_summary)
 
-
-
+app.register_blueprint(test_rev)
 
 
 @app.route("/")
