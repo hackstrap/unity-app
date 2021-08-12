@@ -26,7 +26,6 @@ def get_token(header):
 tables_expenses = Blueprint("tables_expenses", __name__)
 
 @tables_expenses.route("/unity/v1/expenses", methods=["GET"])
-
 def expenses():
     page = request.args.get("page")
     page_size = request.args.get("page_size")

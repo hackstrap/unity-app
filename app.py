@@ -15,6 +15,10 @@ from tables.expenses import tables_expenses
 from tables.users import tables_users
 
 from investor.investor import investor_investment_summary
+from investor.investor import investor_investment_total
+from investor.investor import investor_startups_invested
+from investor.investor import investor_investor_startups
+from investor.investor import investor_investments_month
 
 from startups.tyke.test import test_rev
 
@@ -44,6 +48,11 @@ app.register_blueprint(tables_expenses)
 app.register_blueprint(tables_users)
 
 app.register_blueprint(investor_investment_summary)
+app.register_blueprint(investor_investment_total)
+app.register_blueprint(investor_startups_invested)
+app.register_blueprint(investor_investor_startups)
+app.register_blueprint(investor_investments_month)
+
 
 app.register_blueprint(test_rev)
 
@@ -63,255 +72,255 @@ def v1():
     return "List of v1 endpoints"
 
 
-@app.route("/unity/v1/total_revenue", methods=["GET"])
-def total_revenue():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    startup_id = request.args.get("startup_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
+# @app.route("/unity/v1/total_revenue", methods=["GET"])
+# def total_revenue():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     startup_id = request.args.get("startup_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
 
-    request_base_url = request.base_url
+#     request_base_url = request.base_url
 
-    try:
-        result = requests.get(
-            base_url
-            + "v1/revenue?"
-            + "page={}&page_size={}&startup_id={}&year={}".format(
-                page, page_size, startup_id, year
-            ),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer {}".format(access_token),
-            },
-        )
+#     try:
+#         result = requests.get(
+#             base_url
+#             + "v1/revenue?"
+#             + "page={}&page_size={}&startup_id={}&year={}".format(
+#                 page, page_size, startup_id, year
+#             ),
+#             headers={
+#                 "Content-Type": "application/json",
+#                 "Authorization": "Bearer {}".format(access_token),
+#             },
+#         )
 
-        # If the response was successful, no Exception will be raised
-        result.raise_for_status()
-    except HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")
-    except Exception as err:
-        print(f"Other error occurred: {err}")
-    else:
-        print("Success!")
-    result = requests.get(
-        base_url
-        + "v1/revenue?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
+#         # If the response was successful, no Exception will be raised
+#         result.raise_for_status()
+#     except HTTPError as http_err:
+#         print(f"HTTP error occurred: {http_err}")
+#     except Exception as err:
+#         print(f"Other error occurred: {err}")
+#     else:
+#         print("Success!")
+#     result = requests.get(
+#         base_url
+#         + "v1/revenue?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
 
-    if result.text == "[]":
-        return jsonify([])
-    else:
-        data = json.loads(result.text)
-        data = pd.DataFrame(data)
-        data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
-        data = data.to_dict("records")
-        data = json.dumps(data)
-        return data
-
-
-@app.route("/unity/v1/total_revenue_gr", methods=["GET"])
-def total_revenue_gr():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    startup_id = request.args.get("startup_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
-
-    result = requests.get(
-        base_url
-        + "v1/revenue?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-
-    if result.text == "[]":
-        return jsonify([])
-    else:
-        data = json.loads(result.text)
-        data = pd.DataFrame(data)
-        data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
-        data["total_revenue_gr"] = (
-            data["total_revenue"].pct_change().fillna(0).round(3) * 100
-            )
-        data = data.to_dict("records")
-        data = json.dumps(data)
-        return data
+#     if result.text == "[]":
+#         return jsonify([])
+#     else:
+#         data = json.loads(result.text)
+#         data = pd.DataFrame(data)
+#         data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
+#         data = data.to_dict("records")
+#         data = json.dumps(data)
+#         return data
 
 
-@app.route("/unity/v1/total_mrr_gr", methods=["GET"])
-def total_mrr_gr():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    startup_id = request.args.get("startup_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
+# @app.route("/unity/v1/total_revenue_gr", methods=["GET"])
+# def total_revenue_gr():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     startup_id = request.args.get("startup_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
 
-    result = requests.get(
-        base_url
-        + "v1/revenue?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-    data = json.loads(result.text)
-    data = pd.DataFrame(data)
-    data["total_mrr_gr"] = data["total_mrr"].pct_change().fillna(0).round(3) * 100
-    data = data.to_dict("records")
-    data = json.dumps(data)
-    return data
+#     result = requests.get(
+#         base_url
+#         + "v1/revenue?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
 
-
-@app.route("/unity/v1/total_customer_support_expenses", methods=["GET"])
-def total_customer_support_expenses():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    startup_id = request.args.get("startup_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
-
-    result = requests.get(
-        base_url
-        + "v1/expense?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-    data = json.loads(result.text)
-    data = pd.DataFrame(data)
-    data["total_customer_support_expenses"] = (
-        data["total_payroll_support"] + data["software_and_tools_support"]
-    )
-    data = data.to_dict("records")
-    data = json.dumps(data)
-    return data
+#     if result.text == "[]":
+#         return jsonify([])
+#     else:
+#         data = json.loads(result.text)
+#         data = pd.DataFrame(data)
+#         data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
+#         data["total_revenue_gr"] = (
+#             data["total_revenue"].pct_change().fillna(0).round(3) * 100
+#             )
+#         data = data.to_dict("records")
+#         data = json.dumps(data)
+#         return data
 
 
-@app.route("/unity/v1/total_service_delivery_expenses", methods=["GET"])
-def total_service_delivery_expenses():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    startup_id = request.args.get("startup_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
+# @app.route("/unity/v1/total_mrr_gr", methods=["GET"])
+# def total_mrr_gr():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     startup_id = request.args.get("startup_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
 
-    result = requests.get(
-        base_url
-        + "v1/expense?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-    data = json.loads(result.text)
-    data = pd.DataFrame(data)
-    data["total_service_delivery_expenses"] = data["hosting_service_delivery"]
-    data = data.to_dict("records")
-    data = json.dumps(data)
-    return data
-
-
-@app.route("/unity/v1/total_cost_of_goods_manufactured", methods=["GET"])
-def total_cost_of_goods_manufactured():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    startup_id = request.args.get("startup_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
-
-    result = requests.get(
-        base_url
-        + "v1/expense?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-    data = json.loads(result.text)
-    data = pd.DataFrame(data)
-    data["total_cost_of_goods_manufactured"] = (
-        data["direct_material_costs"]
-        + data["direct_labor_costs"]
-        + data["manufacturing_overhead"]
-        + data["net_wip_inventory"]
-    )
-    data = data.to_dict("records")
-    data = json.dumps(data)
-    return data
+#     result = requests.get(
+#         base_url
+#         + "v1/revenue?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+#     data = json.loads(result.text)
+#     data = pd.DataFrame(data)
+#     data["total_mrr_gr"] = data["total_mrr"].pct_change().fillna(0).round(3) * 100
+#     data = data.to_dict("records")
+#     data = json.dumps(data)
+#     return data
 
 
-@app.route("/unity/v1/total_cogs", methods=["GET"])
-def total_cogs():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    startup_id = request.args.get("startup_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
+# @app.route("/unity/v1/total_customer_support_expenses", methods=["GET"])
+# def total_customer_support_expenses():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     startup_id = request.args.get("startup_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
 
-    result = requests.get(
-        base_url
-        + "v1/expense?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-    data = json.loads(result.text)
-    data = pd.DataFrame(data)
-    data["total_customer_support_expenses"] = (
-        data["total_payroll_support"] + data["software_and_tools_support"]
-    )
-    data["total_service_delivery_expenses"] = data["hosting_service_delivery"]
-    data["total_cost_of_goods_manufactured"] = (
-        data["direct_material_costs"]
-        + data["direct_labor_costs"]
-        + data["manufacturing_overhead"]
-        + data["net_wip_inventory"]
-    )
-    data["total_cogs"] = (
-        data["total_cost_of_goods_manufactured"]
-        + data["net_finished_goods_inventory"]
-        + data["total_other_cogs"]
-    )
-    data = data.to_dict("records")
-    data = json.dumps(data)
-    return data
+#     result = requests.get(
+#         base_url
+#         + "v1/expense?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+#     data = json.loads(result.text)
+#     data = pd.DataFrame(data)
+#     data["total_customer_support_expenses"] = (
+#         data["total_payroll_support"] + data["software_and_tools_support"]
+#     )
+#     data = data.to_dict("records")
+#     data = json.dumps(data)
+#     return data
+
+
+# @app.route("/unity/v1/total_service_delivery_expenses", methods=["GET"])
+# def total_service_delivery_expenses():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     startup_id = request.args.get("startup_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
+
+#     result = requests.get(
+#         base_url
+#         + "v1/expense?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+#     data = json.loads(result.text)
+#     data = pd.DataFrame(data)
+#     data["total_service_delivery_expenses"] = data["hosting_service_delivery"]
+#     data = data.to_dict("records")
+#     data = json.dumps(data)
+#     return data
+
+
+# @app.route("/unity/v1/total_cost_of_goods_manufactured", methods=["GET"])
+# def total_cost_of_goods_manufactured():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     startup_id = request.args.get("startup_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
+
+#     result = requests.get(
+#         base_url
+#         + "v1/expense?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+#     data = json.loads(result.text)
+#     data = pd.DataFrame(data)
+#     data["total_cost_of_goods_manufactured"] = (
+#         data["direct_material_costs"]
+#         + data["direct_labor_costs"]
+#         + data["manufacturing_overhead"]
+#         + data["net_wip_inventory"]
+#     )
+#     data = data.to_dict("records")
+#     data = json.dumps(data)
+#     return data
+
+
+# @app.route("/unity/v1/total_cogs", methods=["GET"])
+# def total_cogs():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     startup_id = request.args.get("startup_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
+
+#     result = requests.get(
+#         base_url
+#         + "v1/expense?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+#     data = json.loads(result.text)
+#     data = pd.DataFrame(data)
+#     data["total_customer_support_expenses"] = (
+#         data["total_payroll_support"] + data["software_and_tools_support"]
+#     )
+#     data["total_service_delivery_expenses"] = data["hosting_service_delivery"]
+#     data["total_cost_of_goods_manufactured"] = (
+#         data["direct_material_costs"]
+#         + data["direct_labor_costs"]
+#         + data["manufacturing_overhead"]
+#         + data["net_wip_inventory"]
+#     )
+#     data["total_cogs"] = (
+#         data["total_cost_of_goods_manufactured"]
+#         + data["net_finished_goods_inventory"]
+#         + data["total_other_cogs"]
+#     )
+#     data = data.to_dict("records")
+#     data = json.dumps(data)
+#     return data
 
 
 @app.route("/unity/v1/total_opex_expenses", methods=["GET"])
@@ -346,104 +355,104 @@ def total_opex_expenses():
     return data
 
 
-@app.route("/unity/v1/total_customers", methods=["GET"])
-def total_customers():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    startup_id = request.args.get("startup_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
+# @app.route("/unity/v1/total_customers", methods=["GET"])
+# def total_customers():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     startup_id = request.args.get("startup_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
 
-    result = requests.get(
-        base_url
-        + "v1/users?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-    data = json.loads(result.text)
-    data = pd.DataFrame(data)
-    data["total_customers"] = (
-        data["total_customers_at_beginning_of_month"]
-        + data["total_new_customers_acquired"]
-        - data["total_customers_churned"]
-    )
-    data = data.to_dict("records")
-    data = json.dumps(data)
-    return data
-
-
-@app.route("/unity/v1/total_monthly_active_users_gr", methods=["GET"])
-def total_monthly_active_users_gr():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    startup_id = request.args.get("startup_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
-
-    result = requests.get(
-        base_url
-        + "v1/users?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-    data = json.loads(result.text)
-    data = pd.DataFrame(data)
-    data["total_monthly_active_users_gr"] = (
-        data["total_monthly_active_users"].pct_change().fillna(0).round(3) * 100
-    )
-    data = data.to_dict("records")
-    data = json.dumps(data)
-    return data
+#     result = requests.get(
+#         base_url
+#         + "v1/users?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+#     data = json.loads(result.text)
+#     data = pd.DataFrame(data)
+#     data["total_customers"] = (
+#         data["total_customers_at_beginning_of_month"]
+#         + data["total_new_customers_acquired"]
+#         - data["total_customers_churned"]
+#     )
+#     data = data.to_dict("records")
+#     data = json.dumps(data)
+#     return data
 
 
-@app.route("/unity/v1/customer_churn_rate", methods=["GET"])
-def customer_churn_rate():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    startup_id = request.args.get("startup_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
+# @app.route("/unity/v1/total_monthly_active_users_gr", methods=["GET"])
+# def total_monthly_active_users_gr():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     startup_id = request.args.get("startup_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
 
-    result = requests.get(
-        base_url
-        + "v1/users?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-    data = json.loads(result.text)
-    data = pd.DataFrame(data)
-    data["customer_churn_rate"] = (
-        data["total_customers_churned"] / data["total_customers_at_beginning_of_month"]
-    ).fillna(0).round(3) * 100
+#     result = requests.get(
+#         base_url
+#         + "v1/users?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+#     data = json.loads(result.text)
+#     data = pd.DataFrame(data)
+#     data["total_monthly_active_users_gr"] = (
+#         data["total_monthly_active_users"].pct_change().fillna(0).round(3) * 100
+#     )
+#     data = data.to_dict("records")
+#     data = json.dumps(data)
+#     return data
 
-    if data["customer_churn_rate"].mean() < 1:
-        data["customer_churn_rate"] = 0.833
-    else:
-        data = data.to_dict("records")
-        data = json.dumps(data)
-        return data
 
-    data = data.to_dict("records")
-    data = json.dumps(data)
-    return data
+# @app.route("/unity/v1/customer_churn_rate", methods=["GET"])
+# def customer_churn_rate():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     startup_id = request.args.get("startup_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
+
+#     result = requests.get(
+#         base_url
+#         + "v1/users?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+#     data = json.loads(result.text)
+#     data = pd.DataFrame(data)
+#     data["customer_churn_rate"] = (
+#         data["total_customers_churned"] / data["total_customers_at_beginning_of_month"]
+#     ).fillna(0).round(3) * 100
+
+#     if data["customer_churn_rate"].mean() < 1:
+#         data["customer_churn_rate"] = 0.833
+#     else:
+#         data = data.to_dict("records")
+#         data = json.dumps(data)
+#         return data
+
+#     data = data.to_dict("records")
+#     data = json.dumps(data)
+#     return data
 
 
 @app.route("/unity/v1/gross_profit_margin", methods=["GET"])
@@ -502,6 +511,7 @@ def gross_profit_margin():
     revenue["gross_profit_margin"] = (
         (revenue["total_revenue"] - expense["total_cogs"]) / revenue["total_revenue"]
     ).round(3) * 100
+    revenue = revenue.round(4)
     revenue = revenue.to_json(orient="records")
     return revenue
 
@@ -553,7 +563,7 @@ def customer_acquisition_cost():
     else:
         users = users.to_json(orient="records")
         return users
-
+    users = users.round(4)
     users = users.to_json(orient="records")
     return users
 
@@ -700,210 +710,211 @@ def ltv_to_cac_ratio():
     users["ltv_to_cac_ratio"] = (
         users["customer_lifetime_value"] / users["customer_acquisition_cost"]
     ).round(3)
+    users = users.round(4)
     users = users.to_json(orient="records")
     return users
 
 
-@app.route("/unity/v1/investment_summary", methods=["GET"])
-def investment_summary():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    investor_id = request.args.get("investor_id")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
+# @app.route("/unity/v1/investment_summary", methods=["GET"])
+# def investment_summary():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     investor_id = request.args.get("investor_id")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
 
-    result = requests.get(
-        base_url
-        + "v1/portfolio?"
-        + "page={}&page_size={}&investor_id={}".format(page, page_size, investor_id),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
+#     result = requests.get(
+#         base_url
+#         + "v1/portfolio?"
+#         + "page={}&page_size={}&investor_id={}".format(page, page_size, investor_id),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
 
-    data = json.loads(result.text)
+#     data = json.loads(result.text)
 
-    data = data[0]
-    data = data["investment_summary"][0]
-    # data = data['investment_summary']
-    return data
-
-
-@app.route("/unity/v1/investment_total", methods=["GET"])
-def investment_total():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    investor_id = request.args.get("investor_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
-
-    if year == None:
-        result = requests.get(
-            base_url
-            + "v1/investment?"
-            + "page={}&page_size={}&investor_id={}".format(
-                page, page_size, investor_id
-            ),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer {}".format(access_token),
-            },
-        )
-
-    else:
-        result = requests.get(
-            base_url
-            + "v1/investment?"
-            + "page={}&page_size={}&investor_id={}&year={}".format(
-                page, page_size, investor_id, year
-            ),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer {}".format(access_token),
-            },
-        )
-
-    data = json.loads(result.text)
-    data = pd.DataFrame(data)
-    data = pd.DataFrame(data.groupby(by=["investor_id"])["amount"].sum())
-    data = data.to_dict()
-    data = json.dumps(data)
-    return data
+#     data = data[0]
+#     data = data["investment_summary"][0]
+#     # data = data['investment_summary']
+#     return data
 
 
-@app.route("/unity/v1/startups_invested", methods=["GET"])
-def startups_invested():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    investor_id = request.args.get("investor_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
+# @app.route("/unity/v1/investment_total", methods=["GET"])
+# def investment_total():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     investor_id = request.args.get("investor_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
 
-    if year == None:
-        result = requests.get(
-            base_url
-            + "v1/investment?"
-            + "page={}&page_size={}&investor_id={}".format(
-                page, page_size, investor_id
-            ),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer {}".format(access_token),
-            },
-        )
+#     if year == None:
+#         result = requests.get(
+#             base_url
+#             + "v1/investment?"
+#             + "page={}&page_size={}&investor_id={}".format(
+#                 page, page_size, investor_id
+#             ),
+#             headers={
+#                 "Content-Type": "application/json",
+#                 "Authorization": "Bearer {}".format(access_token),
+#             },
+#         )
 
-    else:
-        result = requests.get(
-            base_url
-            + "v1/investment?"
-            + "page={}&page_size={}&investor_id={}&year={}".format(
-                page, page_size, investor_id, year
-            ),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer {}".format(access_token),
-            },
-        )
+#     else:
+#         result = requests.get(
+#             base_url
+#             + "v1/investment?"
+#             + "page={}&page_size={}&investor_id={}&year={}".format(
+#                 page, page_size, investor_id, year
+#             ),
+#             headers={
+#                 "Content-Type": "application/json",
+#                 "Authorization": "Bearer {}".format(access_token),
+#             },
+#         )
 
-    data = json.loads(result.text)
-    data = pd.DataFrame(data)
-    data = data.groupby(by=["investor_id"])["startup_id"].unique()
-    data = data.to_json(orient="index")
-    return data
-
-
-@app.route("/unity/v1/investor_startups", methods=["GET"])
-def investor_startups():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    investor_id = request.args.get("investor_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
-
-    result = requests.get(
-        base_url
-        + "v1/investment?"
-        + "page={}&page_size={}&investor_id={}".format(page, page_size, investor_id),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-
-    startups = requests.get(
-        base_url + "v1/startup?" + "page={}&page_size={}".format(page, page_size),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-
-    data = json.loads(result.text)
-    data = pd.DataFrame(data)
-
-    startups = json.loads(startups.text)
-    startups = pd.DataFrame(startups)
-    startups = startups[["startup_name", "startup_id"]]
-
-    data_total = pd.merge(startups, data, on="startup_id")
-    data1 = data_total[["investor_id", "startup_name", "startup_id"]]
-
-    data0 = data1.groupby(by=["investor_id"])["startup_id"].unique()
-
-    d4 = pd.DataFrame(data0["{}".format(investor_id)], columns=["startup_id"])
-    d5 = pd.merge(d4, startups, on="startup_id")
-    d6 = d5.to_json(orient="index")
-
-    return d6
+#     data = json.loads(result.text)
+#     data = pd.DataFrame(data)
+#     data = pd.DataFrame(data.groupby(by=["investor_id"])["amount"].sum())
+#     data = data.to_dict()
+#     data = json.dumps(data)
+#     return data
 
 
-@app.route("/unity/v1/investments_month", methods=["GET"])
-def investments_month():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    investor_id = request.args.get("investor_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
+# @app.route("/unity/v1/startups_invested", methods=["GET"])
+# def startups_invested():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     investor_id = request.args.get("investor_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
 
-    if year == None:
-        result = requests.get(
-            base_url
-            + "v1/investment?"
-            + "page={}&page_size={}&investor_id={}".format(
-                page, page_size, investor_id
-            ),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer {}".format(access_token),
-            },
-        )
+#     if year == None:
+#         result = requests.get(
+#             base_url
+#             + "v1/investment?"
+#             + "page={}&page_size={}&investor_id={}".format(
+#                 page, page_size, investor_id
+#             ),
+#             headers={
+#                 "Content-Type": "application/json",
+#                 "Authorization": "Bearer {}".format(access_token),
+#             },
+#         )
 
-    else:
-        result = requests.get(
-            base_url
-            + "v1/investment?"
-            + "page={}&page_size={}&investor_id={}&year={}".format(
-                page, page_size, investor_id, year
-            ),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer {}".format(access_token),
-            },
-        )
+#     else:
+#         result = requests.get(
+#             base_url
+#             + "v1/investment?"
+#             + "page={}&page_size={}&investor_id={}&year={}".format(
+#                 page, page_size, investor_id, year
+#             ),
+#             headers={
+#                 "Content-Type": "application/json",
+#                 "Authorization": "Bearer {}".format(access_token),
+#             },
+#         )
 
-    data = json.loads(result.text)
-    data = pd.DataFrame(data)
-    data = data.groupby(by=["investor_id", "year", "month"])["amount"].sum()
-    data = data.reset_index().to_json(orient="records")
-    return data
+#     data = json.loads(result.text)
+#     data = pd.DataFrame(data)
+#     data = data.groupby(by=["investor_id"])["startup_id"].unique()
+#     data = data.to_json(orient="index")
+#     return data
+
+
+# @app.route("/unity/v1/investor_startups", methods=["GET"])
+# def investor_startups():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     investor_id = request.args.get("investor_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
+
+#     result = requests.get(
+#         base_url
+#         + "v1/investment?"
+#         + "page={}&page_size={}&investor_id={}".format(page, page_size, investor_id),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+
+#     startups = requests.get(
+#         base_url + "v1/startup?" + "page={}&page_size={}".format(page, page_size),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+
+#     data = json.loads(result.text)
+#     data = pd.DataFrame(data)
+
+#     startups = json.loads(startups.text)
+#     startups = pd.DataFrame(startups)
+#     startups = startups[["startup_name", "startup_id"]]
+
+#     data_total = pd.merge(startups, data, on="startup_id")
+#     data1 = data_total[["investor_id", "startup_name", "startup_id"]]
+
+#     data0 = data1.groupby(by=["investor_id"])["startup_id"].unique()
+
+#     d4 = pd.DataFrame(data0["{}".format(investor_id)], columns=["startup_id"])
+#     d5 = pd.merge(d4, startups, on="startup_id")
+#     d6 = d5.to_json(orient="index")
+
+#     return d6
+
+
+# @app.route("/unity/v1/investments_month", methods=["GET"])
+# def investments_month():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     investor_id = request.args.get("investor_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
+
+#     if year == None:
+#         result = requests.get(
+#             base_url
+#             + "v1/investment?"
+#             + "page={}&page_size={}&investor_id={}".format(
+#                 page, page_size, investor_id
+#             ),
+#             headers={
+#                 "Content-Type": "application/json",
+#                 "Authorization": "Bearer {}".format(access_token),
+#             },
+#         )
+
+#     else:
+#         result = requests.get(
+#             base_url
+#             + "v1/investment?"
+#             + "page={}&page_size={}&investor_id={}&year={}".format(
+#                 page, page_size, investor_id, year
+#             ),
+#             headers={
+#                 "Content-Type": "application/json",
+#                 "Authorization": "Bearer {}".format(access_token),
+#             },
+#         )
+
+#     data = json.loads(result.text)
+#     data = pd.DataFrame(data)
+#     data = data.groupby(by=["investor_id", "year", "month"])["amount"].sum()
+#     data = data.reset_index().to_json(orient="records")
+#     return data
 
 
 # FLASK_DEBUG=1 FLASK_APP=app.py flask run
 # python3 -m flask run
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=False)
+    app.run(host="0.0.0.0", debug=True)
