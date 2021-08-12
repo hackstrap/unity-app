@@ -53,6 +53,38 @@ def investment_summary():
         return data
 
 
+investor_startup_summary = Blueprint("investor_startup_summary", __name__)
+
+@investor_startup_summary.route("/unity/v1/investor/startup_summary", methods=["GET"])
+def startup_summary():
+    page = request.args.get("page")
+    page_size = request.args.get("page_size")
+    investor_id = request.args.get("investor_id")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
+
+    result = requests.get(
+        base_url
+        + "v1/portfolio?"
+        + "page={}&page_size={}&investor_id={}".format(page, page_size, investor_id),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {}".format(access_token),
+        },
+    )
+    if result.text == "[]":
+        return jsonify([])
+
+    else:
+        data = json.loads(result.text)
+
+        data = data[0]
+        data = data["startup_summary"][0]
+        # data = data['investment_summary']
+        return data
+
+
+
 investor_investment_total = Blueprint("investor_investment_total", __name__)
 
 @investor_investment_total.route("/unity/v1/investor/investment_total", methods=["GET"])
