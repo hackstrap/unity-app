@@ -13,6 +13,7 @@ console = Console()
 from tables.revenue import tables_revenue
 from tables.expenses import tables_expenses
 from tables.users import tables_users
+from tables.opex import tables_opex
 
 from investor.investor import investor_investment_summary
 from investor.investor import investor_startup_summary
@@ -47,6 +48,7 @@ app = Flask(__name__)
 app.register_blueprint(tables_revenue)
 app.register_blueprint(tables_expenses)
 app.register_blueprint(tables_users)
+app.register_blueprint(tables_opex)
 
 app.register_blueprint(investor_investment_summary)
 app.register_blueprint(investor_startup_summary)
@@ -325,36 +327,36 @@ def v1():
 #     return data
 
 
-@app.route("/unity/v1/total_opex_expenses", methods=["GET"])
-def total_opex_expenses():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    startup_id = request.args.get("startup_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
+# @app.route("/unity/v1/total_opex_expenses", methods=["GET"])
+# def total_opex_expenses():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     startup_id = request.args.get("startup_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
 
-    result = requests.get(
-        base_url
-        + "v1/opex?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-    data = json.loads(result.text)
-    data = pd.DataFrame(data)
-    data["total_opex_expenses"] = (
-        data["total_general_and_administrative_expenses"]
-        + data["total_sales_and_marketing_expenses"]
-        + data["total_research_and_development_expenses"]
-    )
-    data = data.to_dict("records")
-    data = json.dumps(data)
-    return data
+#     result = requests.get(
+#         base_url
+#         + "v1/opex?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+#     data = json.loads(result.text)
+#     data = pd.DataFrame(data)
+#     data["total_opex_expenses"] = (
+#         data["total_general_and_administrative_expenses"]
+#         + data["total_sales_and_marketing_expenses"]
+#         + data["total_research_and_development_expenses"]
+#     )
+#     data = data.to_dict("records")
+#     data = json.dumps(data)
+#     return data
 
 
 # @app.route("/unity/v1/total_customers", methods=["GET"])

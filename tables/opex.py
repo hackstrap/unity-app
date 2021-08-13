@@ -23,10 +23,10 @@ def get_token(header):
     return token
 
 
-tables_revenue = Blueprint("tables_revenue", __name__)
+tables_opex = Blueprint("tables_opex", __name__)
 
-@tables_revenue.route("/unity/v1/revenue", methods=["GET"])
-def revenue():
+@tables_opex.route("/unity/v1/opex", methods=["GET"])
+def opex():
     page = request.args.get("page")
     page_size = request.args.get("page_size")
     startup_id = request.args.get("startup_id")
@@ -34,32 +34,9 @@ def revenue():
     header = request.headers.get("Authorization")
     access_token = get_token(header)
 
-    request_base_url = request.base_url
-
-    try:
-        result = requests.get(
-            base_url
-            + "v1/revenue?"
-            + "page={}&page_size={}&startup_id={}&year={}".format(
-                page, page_size, startup_id, year
-            ),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer {}".format(access_token),
-            },
-        )
-
-        # If the response was successful, no Exception will be raised
-        result.raise_for_status()
-    except HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")
-    except Exception as err:
-        print(f"Other error occurred: {err}")
-    else:
-        print("Success!")
     result = requests.get(
         base_url
-        + "v1/revenue?"
+        + "v1/opex?"
         + "page={}&page_size={}&startup_id={}&year={}".format(
             page, page_size, startup_id, year
         ),
@@ -68,17 +45,18 @@ def revenue():
             "Authorization": "Bearer {}".format(access_token),
         },
     )
-
     if result.text == "[]":
         return jsonify([])
+
     else:
         data = json.loads(result.text)
         data = pd.DataFrame(data)
-        data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
-        data["total_revenue_gr"] = (
-            data["total_revenue"].pct_change().fillna(0).round(3) * 100
-            )
-        data["total_mrr_gr"] = data["total_mrr"].pct_change().fillna(0).round(3) * 100
+        data["total_opex_expenses"] = (
+            data["total_general_and_administrative_expenses"]
+            + data["total_sales_and_marketing_expenses"]
+            + data["total_research_and_development_expenses"]
+        )
+
         data = data.round(4)
         data = data.to_dict("records")
         data = json.dumps(data)

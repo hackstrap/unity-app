@@ -26,7 +26,6 @@ def get_token(header):
 tables_users = Blueprint("tables_users", __name__)
 
 @tables_users.route("/unity/v1/users", methods=["GET"])
-
 def users():
     page = request.args.get("page")
     page_size = request.args.get("page_size")
