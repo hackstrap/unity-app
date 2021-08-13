@@ -459,65 +459,65 @@ def v1():
 #     return data
 
 
-@app.route("/unity/v1/gross_profit_margin", methods=["GET"])
-def gross_profit_margin():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    startup_id = request.args.get("startup_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
+# @app.route("/unity/v1/gross_profit_margin", methods=["GET"])
+# def gross_profit_margin():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     startup_id = request.args.get("startup_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
 
-    revenue = requests.get(
-        base_url
-        + "v1/revenue?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-    expense = requests.get(
-        base_url
-        + "v1/expense?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-    revenue = json.loads(revenue.text)
-    revenue = pd.DataFrame(revenue)
-    expense = json.loads(expense.text)
-    expense = pd.DataFrame(expense)
-    revenue["total_revenue"] = (
-        revenue["total_mrr"] + revenue["total_non_recurring_revenue"]
-    )
-    expense["total_customer_support_expenses"] = (
-        expense["total_payroll_support"] + expense["software_and_tools_support"]
-    )
-    expense["total_service_delivery_expenses"] = expense["hosting_service_delivery"]
-    expense["total_cost_of_goods_manufactured"] = (
-        expense["direct_material_costs"]
-        + expense["direct_labor_costs"]
-        + expense["manufacturing_overhead"]
-        + expense["net_wip_inventory"]
-    )
-    expense["total_cogs"] = (
-        expense["total_cost_of_goods_manufactured"]
-        + expense["net_finished_goods_inventory"]
-        + expense["total_other_cogs"]
-    )
-    revenue["gross_profit_margin"] = (
-        (revenue["total_revenue"] - expense["total_cogs"]) / revenue["total_revenue"]
-    ).round(3) * 100
-    revenue = revenue.round(4)
-    revenue = revenue.to_json(orient="records")
-    return revenue
+#     revenue = requests.get(
+#         base_url
+#         + "v1/revenue?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+#     expense = requests.get(
+#         base_url
+#         + "v1/expense?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+#     revenue = json.loads(revenue.text)
+#     revenue = pd.DataFrame(revenue)
+#     expense = json.loads(expense.text)
+#     expense = pd.DataFrame(expense)
+#     revenue["total_revenue"] = (
+#         revenue["total_mrr"] + revenue["total_non_recurring_revenue"]
+#     )
+#     expense["total_customer_support_expenses"] = (
+#         expense["total_payroll_support"] + expense["software_and_tools_support"]
+#     )
+#     expense["total_service_delivery_expenses"] = expense["hosting_service_delivery"]
+#     expense["total_cost_of_goods_manufactured"] = (
+#         expense["direct_material_costs"]
+#         + expense["direct_labor_costs"]
+#         + expense["manufacturing_overhead"]
+#         + expense["net_wip_inventory"]
+#     )
+#     expense["total_cogs"] = (
+#         expense["total_cost_of_goods_manufactured"]
+#         + expense["net_finished_goods_inventory"]
+#         + expense["total_other_cogs"]
+#     )
+#     revenue["gross_profit_margin"] = (
+#         (revenue["total_revenue"] - expense["total_cogs"]) / revenue["total_revenue"]
+#     ).round(3) * 100
+#     revenue = revenue.round(4)
+#     revenue = revenue.to_json(orient="records")
+#     return revenue
 
 
 @app.route("/unity/v1/customer_acquisition_cost", methods=["GET"])
