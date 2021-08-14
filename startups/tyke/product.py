@@ -23,10 +23,10 @@ def get_token(header):
     return token
 
 
-test_rev = Blueprint("test_rev", __name__)
+tables_product = Blueprint("tables_product", __name__)
 
-@test_rev.route("/unity/v1/rev", methods=["GET"])
-def revenue():
+@tables_product.route("/unity/v1/product", methods=["GET"])
+def product():
     page = request.args.get("page")
     page_size = request.args.get("page_size")
     startup_id = request.args.get("startup_id")
@@ -39,7 +39,7 @@ def revenue():
     try:
         result = requests.get(
             base_url
-            + "v1/revenue?"
+            + "v1/product?"
             + "page={}&page_size={}&startup_id={}&year={}".format(
                 page, page_size, startup_id, year
             ),
@@ -59,7 +59,7 @@ def revenue():
         print("Success!")
     result = requests.get(
         base_url
-        + "v1/revenue?"
+        + "v1/product?"
         + "page={}&page_size={}&startup_id={}&year={}".format(
             page, page_size, startup_id, year
         ),
@@ -72,14 +72,13 @@ def revenue():
     if result.text == "[]":
         return jsonify([])
     else:
-        data = json.loads(result.text)
-        data = pd.DataFrame(data)
-        data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
-        data["total_revenue_gr"] = (
-            data["total_revenue"].pct_change().fillna(0).round(3) * 100
-            )
-        data["total_mrr_gr"] = data["total_mrr"].pct_change().fillna(0).round(3) * 100
-        data = data.round(4)
-        data = data.to_dict("records")
-        data = json.dumps(data)
-        return data
+    
+
+        
+     
+        # data = data.round(4)
+        # data = data.to_dict("records")
+        # data = json.dumps(data)
+
+
+        return result.text

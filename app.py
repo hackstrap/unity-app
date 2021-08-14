@@ -22,7 +22,10 @@ from investor.investor import investor_startups_invested
 from investor.investor import investor_investor_startups
 from investor.investor import investor_investments_month
 
+
+#startups
 from startups.tyke.test import test_rev
+from startups.tyke.product import tables_product
 
 
 
@@ -59,6 +62,7 @@ app.register_blueprint(investor_investments_month)
 
 
 app.register_blueprint(test_rev)
+app.register_blueprint(tables_product)
 
 
 @app.route("/")
@@ -520,203 +524,203 @@ def v1():
 #     return revenue
 
 
-@app.route("/unity/v1/customer_acquisition_cost", methods=["GET"])
-def customer_acquisition_cost():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    startup_id = request.args.get("startup_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
+# @app.route("/unity/v1/customer_acquisition_cost", methods=["GET"])
+# def customer_acquisition_cost():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     startup_id = request.args.get("startup_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
 
-    users = requests.get(
-        base_url
-        + "v1/users?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-    opex = requests.get(
-        base_url
-        + "v1/opex?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-    users = json.loads(users.text)
-    users = pd.DataFrame(users)
-    opex = json.loads(opex.text)
-    opex = pd.DataFrame(opex)
+#     users = requests.get(
+#         base_url
+#         + "v1/users?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+#     opex = requests.get(
+#         base_url
+#         + "v1/opex?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+#     users = json.loads(users.text)
+#     users = pd.DataFrame(users)
+#     opex = json.loads(opex.text)
+#     opex = pd.DataFrame(opex)
 
-    users["customer_acquisition_cost"] = (
-        opex["total_sales_and_marketing_expenses"]
-        / users["total_new_customers_acquired"]
-    ).round(3)
+#     users["customer_acquisition_cost"] = (
+#         opex["total_sales_and_marketing_expenses"]
+#         / users["total_new_customers_acquired"]
+#     ).round(3)
 
-    if users["customer_acquisition_cost"].mean() < 1:
-        users["customer_acquisition_cost"] = 1
+#     if users["customer_acquisition_cost"].mean() < 1:
+#         users["customer_acquisition_cost"] = 1
 
-    else:
-        users = users.to_json(orient="records")
-        return users
-    users = users.round(4)
-    users = users.to_json(orient="records")
-    return users
+#     else:
+#         users = users.to_json(orient="records")
+#         return users
+#     users = users.round(4)
+#     users = users.to_json(orient="records")
+#     return users
 
 
-@app.route("/unity/v1/ltv_to_cac_ratio", methods=["GET"])
-def ltv_to_cac_ratio():
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    startup_id = request.args.get("startup_id")
-    year = request.args.get("year")
-    header = request.headers.get("Authorization")
-    access_token = get_token(header)
+# @app.route("/unity/v1/ltv_to_cac_ratio", methods=["GET"])
+# def ltv_to_cac_ratio():
+#     page = request.args.get("page")
+#     page_size = request.args.get("page_size")
+#     startup_id = request.args.get("startup_id")
+#     year = request.args.get("year")
+#     header = request.headers.get("Authorization")
+#     access_token = get_token(header)
 
-    revenue = requests.get(
-        base_url
-        + "v1/revenue?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-    users = requests.get(
-        base_url
-        + "v1/users?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-    opex = requests.get(
-        base_url
-        + "v1/opex?"
-        + "page={}&page_size={}&startup_id={}&year={}".format(
-            page, page_size, startup_id, year
-        ),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
-    revenue = json.loads(revenue.text)
-    revenue = pd.DataFrame(revenue)
-    users = json.loads(users.text)
-    users = pd.DataFrame(users)
-    opex = json.loads(opex.text)
-    opex = pd.DataFrame(opex)
+#     revenue = requests.get(
+#         base_url
+#         + "v1/revenue?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+#     users = requests.get(
+#         base_url
+#         + "v1/users?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+#     opex = requests.get(
+#         base_url
+#         + "v1/opex?"
+#         + "page={}&page_size={}&startup_id={}&year={}".format(
+#             page, page_size, startup_id, year
+#         ),
+#         headers={
+#             "Content-Type": "application/json",
+#             "Authorization": "Bearer {}".format(access_token),
+#         },
+#     )
+#     revenue = json.loads(revenue.text)
+#     revenue = pd.DataFrame(revenue)
+#     users = json.loads(users.text)
+#     users = pd.DataFrame(users)
+#     opex = json.loads(opex.text)
+#     opex = pd.DataFrame(opex)
 
-    users["customer_churn_rate"] = (
-        users["total_customers_churned"]
-        / users["total_customers_at_beginning_of_month"]
-    ).fillna(0).round(3) * 100
+#     users["customer_churn_rate"] = (
+#         users["total_customers_churned"]
+#         / users["total_customers_at_beginning_of_month"]
+#     ).fillna(0).round(3) * 100
 
-    if users["customer_churn_rate"].mean() < 1:
-        users["customer_churn_rate"] = 0.833
-    else:
-        users["customer_acquisition_cost"] = (
-            opex["total_sales_and_marketing_expenses"]
-            / users["total_new_customers_acquired"]
-        ).round(3)
+#     if users["customer_churn_rate"].mean() < 1:
+#         users["customer_churn_rate"] = 0.833
+#     else:
+#         users["customer_acquisition_cost"] = (
+#             opex["total_sales_and_marketing_expenses"]
+#             / users["total_new_customers_acquired"]
+#         ).round(3)
 
-        if users["customer_acquisition_cost"].mean() < 1:
-            users["customer_acquisition_cost"] = 1
+#         if users["customer_acquisition_cost"].mean() < 1:
+#             users["customer_acquisition_cost"] = 1
 
-        else:
-            users["customer_lifetime_value"] = (
-                (revenue["total_mrr"] + revenue["total_non_recurring_revenue"])
-                / (
-                    (
-                        users["total_customers_at_beginning_of_month"]
-                        + users["total_new_customers_acquired"]
-                        - users["total_customers_churned"]
-                    )
-                    * (
-                        (
-                            users["total_customers_churned"]
-                            / users["total_customers_at_beginning_of_month"]
-                        )
-                    )
-                    .fillna(0)
-                    .round(3)
-                    * 100
-                )
-            ).round(3)
-            users["ltv_to_cac_ratio"] = (
-                users["customer_lifetime_value"] / users["customer_acquisition_cost"]
-            ).round(3)
-            users = users.to_json(orient="records")
-            return users
+#         else:
+#             users["customer_lifetime_value"] = (
+#                 (revenue["total_mrr"] + revenue["total_non_recurring_revenue"])
+#                 / (
+#                     (
+#                         users["total_customers_at_beginning_of_month"]
+#                         + users["total_new_customers_acquired"]
+#                         - users["total_customers_churned"]
+#                     )
+#                     * (
+#                         (
+#                             users["total_customers_churned"]
+#                             / users["total_customers_at_beginning_of_month"]
+#                         )
+#                     )
+#                     .fillna(0)
+#                     .round(3)
+#                     * 100
+#                 )
+#             ).round(3)
+#             users["ltv_to_cac_ratio"] = (
+#                 users["customer_lifetime_value"] / users["customer_acquisition_cost"]
+#             ).round(3)
+#             users = users.to_json(orient="records")
+#             return users
 
-        users["customer_lifetime_value"] = (
-            (revenue["total_mrr"] + revenue["total_non_recurring_revenue"])
-            / (
-                (
-                    users["total_customers_at_beginning_of_month"]
-                    + users["total_new_customers_acquired"]
-                    - users["total_customers_churned"]
-                )
-                * (
-                    (
-                        users["total_customers_churned"]
-                        / users["total_customers_at_beginning_of_month"]
-                    )
-                )
-                .fillna(0)
-                .round(3)
-                * 100
-            )
-        ).round(3)
-        users["ltv_to_cac_ratio"] = (
-            users["customer_lifetime_value"] / users["customer_acquisition_cost"]
-        ).round(3)
-        users = users.to_json(orient="records")
-        return users
+#         users["customer_lifetime_value"] = (
+#             (revenue["total_mrr"] + revenue["total_non_recurring_revenue"])
+#             / (
+#                 (
+#                     users["total_customers_at_beginning_of_month"]
+#                     + users["total_new_customers_acquired"]
+#                     - users["total_customers_churned"]
+#                 )
+#                 * (
+#                     (
+#                         users["total_customers_churned"]
+#                         / users["total_customers_at_beginning_of_month"]
+#                     )
+#                 )
+#                 .fillna(0)
+#                 .round(3)
+#                 * 100
+#             )
+#         ).round(3)
+#         users["ltv_to_cac_ratio"] = (
+#             users["customer_lifetime_value"] / users["customer_acquisition_cost"]
+#         ).round(3)
+#         users = users.to_json(orient="records")
+#         return users
 
-    users["customer_acquisition_cost"] = (
-        opex["total_sales_and_marketing_expenses"]
-        / users["total_new_customers_acquired"]
-    ).round(3)
-    users["customer_lifetime_value"] = (
-        (revenue["total_mrr"] + revenue["total_non_recurring_revenue"])
-        / (
-            (
-                users["total_customers_at_beginning_of_month"]
-                + users["total_new_customers_acquired"]
-                - users["total_customers_churned"]
-            )
-            * (
-                (
-                    users["total_customers_churned"]
-                    / users["total_customers_at_beginning_of_month"]
-                )
-            )
-            .fillna(0)
-            .round(3)
-            * 100
-        )
-    ).round(3)
-    users["ltv_to_cac_ratio"] = (
-        users["customer_lifetime_value"] / users["customer_acquisition_cost"]
-    ).round(3)
-    users = users.round(4)
-    users = users.to_json(orient="records")
-    return users
+#     users["customer_acquisition_cost"] = (
+#         opex["total_sales_and_marketing_expenses"]
+#         / users["total_new_customers_acquired"]
+#     ).round(3)
+#     users["customer_lifetime_value"] = (
+#         (revenue["total_mrr"] + revenue["total_non_recurring_revenue"])
+#         / (
+#             (
+#                 users["total_customers_at_beginning_of_month"]
+#                 + users["total_new_customers_acquired"]
+#                 - users["total_customers_churned"]
+#             )
+#             * (
+#                 (
+#                     users["total_customers_churned"]
+#                     / users["total_customers_at_beginning_of_month"]
+#                 )
+#             )
+#             .fillna(0)
+#             .round(3)
+#             * 100
+#         )
+#     ).round(3)
+#     users["ltv_to_cac_ratio"] = (
+#         users["customer_lifetime_value"] / users["customer_acquisition_cost"]
+#     ).round(3)
+#     users = users.round(4)
+#     users = users.to_json(orient="records")
+#     return users
 
 
 # @app.route("/unity/v1/investment_summary", methods=["GET"])
