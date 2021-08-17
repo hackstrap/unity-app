@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 import requests
 from flask import Blueprint, jsonify, request
+from flask_cors import CORS, cross_origin
+
 from requests.api import get
 from requests.exceptions import HTTPError
 from rich.console import Console
@@ -24,6 +26,8 @@ def get_token(header):
 
 
 tables_users = Blueprint("tables_users", __name__)
+CORS(tables_users)
+
 @tables_users.route("/unity/v1/users", methods=["GET"])
 def users():
     page = request.args.get("page")

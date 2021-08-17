@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 import requests
 from flask import Blueprint, jsonify, request
+from flask_cors import CORS, cross_origin
+
 from requests.api import get
 from requests.exceptions import HTTPError
 from rich.console import Console
@@ -24,6 +26,7 @@ def get_token(header):
 
 
 tables_expenses = Blueprint("tables_expenses", __name__)
+CORS(tables_expenses)
 
 @tables_expenses.route("/unity/v1/expenses", methods=["GET"])
 def expenses():
