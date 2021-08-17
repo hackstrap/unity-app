@@ -4,7 +4,10 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import requests
+
 from flask import Flask, jsonify, request
+from flask_cors import CORS, cross_origin
+
 from requests.api import get
 from requests.exceptions import HTTPError
 from rich.console import Console
@@ -46,6 +49,7 @@ def get_token(header):
 
 
 app = Flask(__name__)
+CORS(app)
 
     
 app.register_blueprint(tables_revenue)
