@@ -95,10 +95,12 @@ def revenue():
         data = pd.DataFrame(data)
         data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
         data["total_revenue_gr"] = (
-            data["total_revenue"].pct_change().fillna(0).round(3) * 100
+            data["total_revenue"].pct_change().round(3) * 100
             )
         data["total_mrr_gr"] = data["total_mrr"].pct_change().fillna(0).round(3) * 100
         
+
+        data = data.replace([np.inf, -np.inf], np.nan)
         data = data.fillna(0)
         data = data.round(4)
         data = data.to_dict("records")

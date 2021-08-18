@@ -92,6 +92,8 @@ def expenses():
         + data["net_finished_goods_inventory"]
         + data["total_other_cogs"]
         )
+
+        data = data.replace([np.inf, -np.inf], np.nan)
         data = data.round(4)
         data = data.to_dict("records")
         data = json.dumps(data)
