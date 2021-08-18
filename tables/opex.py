@@ -60,6 +60,7 @@ def opex():
             + data["total_research_and_development_expenses"]
         )
 
+        data = data.replace([np.inf, -np.inf], np.nan)
         data = data.round(4)
         data = data.to_dict("records")
         data = json.dumps(data)

@@ -87,9 +87,11 @@ def product():
      
         df_f = pd.DataFrame.from_dict(product_dict)
 
+
         df_f['Avg Investor Participation per Campaign'] = df_f['Investors Participated'] / df_f['No. of Campaigns']
         df_f['Avg Investor Investment Amount per Campaign'] = (df_f['Total Invested Amount'] / df_f['No. of Campaigns']) / (df_f['Investors Participated'] / df_f['No. of Campaigns'])
         data = df_f.round(1)
+        data = data.replace([np.inf, -np.inf], np.nan)
 
         data = data.to_dict('list')
 
@@ -97,6 +99,7 @@ def product():
         product_data[0]['dataset'][3] = data['Avg Investor Participation per Campaign']
         product_data[0]['dataset'][4] = data['Avg Investor Investment Amount per Campaign']
         data = product_data
+
         data = json.dumps(data)
         #print(data)
         return data
