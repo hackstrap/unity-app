@@ -7,6 +7,8 @@ import requests
 from flask import Blueprint, jsonify, request
 from flask_cors import CORS, cross_origin
 
+from itertools import zip_longest
+
 from requests.api import get
 from requests.exceptions import HTTPError
 from rich.console import Console
@@ -74,14 +76,27 @@ def product():
 
     if result.text == "[]":
         return jsonify([])
+
     else:
-    
-
+        ref_data = json.loads(result.text)
+        data = ref_data
         
+        dataset = data[0]['dataset']
+        keys = data[0]['labels']
+        product_dict = dict(zip_longest(keys, dataset))
      
-        # data = data.round(4)
-        # data = data.to_dict("records")
-        # data = json.dumps(data)
+        df_f = pd.DataFrame.from_dict(product_dict)
 
+        df_f['Avg Investor Participation per Campaign'] = df_f['Investors Participated'] / df_f['No. of Campaigns']
+        df_f['Avg Investor Investment Amount per Campaign'] = (df_f['Total Invested Amount'] / df_f['No. of Campaigns']) / (df_f['Investors Participated'] / df_f['No. of Campaigns'])
+        data = df_f.round(1)
 
-        return result.text
+        data = data.to_dict('list')
+
+        product_data = ref_data
+        product_data[0]['dataset'][3] = data['Avg Investor Participation per Campaign']
+        product_data[0]['dataset'][4] = data['Avg Investor Investment Amount per Campaign']
+        data = product_data
+        data = json.dumps(data)
+        #print(data)
+        return data
