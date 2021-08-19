@@ -96,12 +96,14 @@ def revenue():
 
         data = data.sort_values(by="month")
 
-
+        
 
         data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
+        
         data["total_revenue_gr"] = (
             data["total_revenue"].pct_change().round(3) * 100
             )
+        
         data["total_mrr_gr"] = data["total_mrr"].pct_change().round(3) * 100
         
 
@@ -126,10 +128,13 @@ def revenue():
         expense = expense.sort_values(by="month")
         
         data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
+        print(data)
         data["total_revenue_gr"] = (
             data["total_revenue"].pct_change().round(3) * 100
             )
+        print(data)
         data["total_mrr_gr"] = data["total_mrr"].pct_change().round(3) * 100
+        print(data)
         
         expense["total_customer_support_expenses"] = (
         expense["total_payroll_support"] + expense["software_and_tools_support"]

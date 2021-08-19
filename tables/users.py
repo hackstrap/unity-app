@@ -119,11 +119,16 @@ def users():
 
         if users["customer_churn_rate"].mean() < 1:
             users["customer_churn_rate"] = 0.833
+            users = users.replace([np.inf, -np.inf], np.nan)
+            users = users.where(users.notnull(), None)
         else:
+            users = users.replace([np.inf, -np.inf], np.nan)
+            users = users.where(users.notnull(), None)
             users = users.to_dict("records")
             users = json.dumps(users)
             return users
 
+        users = users.replace([np.inf, -np.inf], np.nan)
         users = users.where(users.notnull(), None)
         users = users.round(4)
         users = users.to_dict("records")
@@ -152,6 +157,8 @@ def users():
         users["customer_churn_rate"] = (
         users["total_customers_churned"] / users["total_customers_at_beginning_of_month"]
         ).round(3) * 100
+        users = users.replace([np.inf, -np.inf], np.nan)
+
 
         if users["customer_churn_rate"].mean() < 1:
             users["customer_churn_rate"] = 0.833
@@ -210,6 +217,8 @@ def users():
         users["customer_churn_rate"] = (
         users["total_customers_churned"] / users["total_customers_at_beginning_of_month"]
         ).round(3) * 100
+        users = users.replace([np.inf, -np.inf], np.nan)
+        users = users.where(users.notnull(), None)
 
         if users["customer_churn_rate"].mean() < 1:
             users["customer_churn_rate"] = 0.833
@@ -244,6 +253,7 @@ def users():
                 users["ltv_to_cac_ratio"] = (
                     users["customer_lifetime_value"] / users["customer_acquisition_cost"]
                 ).round(3)
+                users = users.replace([np.inf, -np.inf], np.nan)
                 users = users.where(users.notnull(), None)
                 users = users.to_json(orient="records")
                 return users
@@ -269,6 +279,7 @@ def users():
             users["ltv_to_cac_ratio"] = (
                 users["customer_lifetime_value"] / users["customer_acquisition_cost"]
             ).round(3)
+            users = users.replace([np.inf, -np.inf], np.nan)
             users = users.where(users.notnull(), None)
             users = users.to_json(orient="records")
             return users
