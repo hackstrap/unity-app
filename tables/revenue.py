@@ -93,6 +93,11 @@ def revenue():
     elif expense.text == "[]":
         data = json.loads(result.text)
         data = pd.DataFrame(data)
+
+        data = data.sort_values(by="month")
+
+
+
         data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
         data["total_revenue_gr"] = (
             data["total_revenue"].pct_change().round(3) * 100
@@ -112,11 +117,13 @@ def revenue():
     else:
         data = json.loads(result.text)
         data = pd.DataFrame(data)
+
+        data = data.sort_values(by="month")
         
         expense = json.loads(expense.text)
         expense = pd.DataFrame(expense)
         
-        
+        expense = expense.sort_values(by="month")
         
         data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
         data["total_revenue_gr"] = (

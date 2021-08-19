@@ -77,6 +77,8 @@ def expenses():
     else:
         data = json.loads(result.text)
         data = pd.DataFrame(data)
+        data = data.sort_values(by="month")
+
         data["total_customer_support_expenses"] = (
             data["total_payroll_support"] + data["software_and_tools_support"]
         )

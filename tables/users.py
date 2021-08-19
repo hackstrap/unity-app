@@ -102,6 +102,7 @@ def users():
     elif revenue.text == "[]" or opex.text == "[]":
         users = json.loads(users.text)
         users = pd.DataFrame(users)
+        users = users.sort_values(by="month")
 
 
         users["total_customers"] = (
@@ -132,8 +133,11 @@ def users():
     elif revenue.text == "[]":
         users = json.loads(users.text)
         users = pd.DataFrame(users)
+        users = users.sort_values(by="month")
+
         opex = json.loads(opex.text)
         opex = pd.DataFrame(opex)    
+        opex = opex.sort_values(by="month")
 
 
 
@@ -183,10 +187,16 @@ def users():
     else:
         users = json.loads(users.text)
         users = pd.DataFrame(users)
+        users = users.sort_values(by="month")
+
         revenue = json.loads(revenue.text)
         revenue = pd.DataFrame(revenue)
+        revenue = revenue.sort_values(by="month")
+
         opex = json.loads(opex.text)
         opex = pd.DataFrame(opex)
+        opex = opex.sort_values(by="month")
+
 
 
         users["total_customers"] = (
