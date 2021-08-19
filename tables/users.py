@@ -102,13 +102,15 @@ def users():
     elif revenue.text == "[]" or opex.text == "[]":
         users = json.loads(users.text)
         users = pd.DataFrame(users)
+
+
         users["total_customers"] = (
         users["total_customers_at_beginning_of_month"]
         + users["total_new_customers_acquired"]
         - users["total_customers_churned"]
     )
         users["total_monthly_active_users_gr"] = (
-        users["total_monthly_active_users"].pct_change().fillna(0).round(3) * 100
+        users["total_monthly_active_users"].pct_change().round(3) * 100
     )
         users["customer_churn_rate"] = (
         users["total_customers_churned"] / users["total_customers_at_beginning_of_month"]
@@ -121,6 +123,7 @@ def users():
             users = json.dumps(users)
             return users
 
+        users = users.where(users.notnull(), None)
         users = users.round(4)
         users = users.to_dict("records")
         users = json.dumps(users)
@@ -140,11 +143,11 @@ def users():
         - users["total_customers_churned"]
     )
         users["total_monthly_active_users_gr"] = (
-        users["total_monthly_active_users"].pct_change().fillna(0).round(3) * 100
+        users["total_monthly_active_users"].pct_change().round(3) * 100
     )
         users["customer_churn_rate"] = (
         users["total_customers_churned"] / users["total_customers_at_beginning_of_month"]
-        ).fillna(0).round(3) * 100
+        ).round(3) * 100
 
         if users["customer_churn_rate"].mean() < 1:
             users["customer_churn_rate"] = 0.833
@@ -158,16 +161,19 @@ def users():
                 users["customer_acquisition_cost"] = 1
 
             else:
+                users = users.where(users.notnull(), None)
                 users = users.round(4)
                 users = users.to_dict("records")
                 users = json.dumps(users)
                 return users
 
+            users = users.where(users.notnull(), None)
             users = users.round(4)
             users = users.to_dict("records")
             users = json.dumps(users)
             return users
 
+        users = users.where(users.notnull(), None)
         users = users.round(4)
         users = users.to_dict("records")
         users = json.dumps(users)
@@ -189,11 +195,11 @@ def users():
         - users["total_customers_churned"]
     )
         users["total_monthly_active_users_gr"] = (
-        users["total_monthly_active_users"].pct_change().fillna(0).round(3) * 100
+        users["total_monthly_active_users"].pct_change().round(3) * 100
     )
         users["customer_churn_rate"] = (
         users["total_customers_churned"] / users["total_customers_at_beginning_of_month"]
-        ).fillna(0).round(3) * 100
+        ).round(3) * 100
 
         if users["customer_churn_rate"].mean() < 1:
             users["customer_churn_rate"] = 0.833
@@ -221,7 +227,6 @@ def users():
                                 / users["total_customers_at_beginning_of_month"]
                             )
                         )
-                        .fillna(0)
                         .round(3)
                         * 100
                     )
@@ -229,6 +234,7 @@ def users():
                 users["ltv_to_cac_ratio"] = (
                     users["customer_lifetime_value"] / users["customer_acquisition_cost"]
                 ).round(3)
+                users = users.where(users.notnull(), None)
                 users = users.to_json(orient="records")
                 return users
 
@@ -246,7 +252,6 @@ def users():
                             / users["total_customers_at_beginning_of_month"]
                         )
                     )
-                    .fillna(0)
                     .round(3)
                     * 100
                 )
@@ -254,6 +259,7 @@ def users():
             users["ltv_to_cac_ratio"] = (
                 users["customer_lifetime_value"] / users["customer_acquisition_cost"]
             ).round(3)
+            users = users.where(users.notnull(), None)
             users = users.to_json(orient="records")
             return users
 
@@ -275,7 +281,6 @@ def users():
                         / users["total_customers_at_beginning_of_month"]
                     )
                 )
-                .fillna(0)
                 .round(3)
                 * 100
             )
@@ -285,6 +290,8 @@ def users():
         ).round(3)
 
         users = users.replace([np.inf, -np.inf], np.nan)
+        users = users.where(users.notnull(), None)
+
         users = users.round(4)
         users = users.to_json(orient="records")
         return users

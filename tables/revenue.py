@@ -97,11 +97,12 @@ def revenue():
         data["total_revenue_gr"] = (
             data["total_revenue"].pct_change().round(3) * 100
             )
-        data["total_mrr_gr"] = data["total_mrr"].pct_change().fillna(0).round(3) * 100
+        data["total_mrr_gr"] = data["total_mrr"].pct_change().round(3) * 100
         
 
         data = data.replace([np.inf, -np.inf], np.nan)
-        data = data.fillna(0)
+        #data = data.fillna(0)
+        data = data.where(data.notnull(), None)
         data = data.round(4)
         data = data.to_dict("records")
         data = json.dumps(data)
@@ -119,9 +120,9 @@ def revenue():
         
         data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
         data["total_revenue_gr"] = (
-            data["total_revenue"].pct_change().fillna(0).round(3) * 100
+            data["total_revenue"].pct_change().round(3) * 100
             )
-        data["total_mrr_gr"] = data["total_mrr"].pct_change().fillna(0).round(3) * 100
+        data["total_mrr_gr"] = data["total_mrr"].pct_change().round(3) * 100
         
         expense["total_customer_support_expenses"] = (
         expense["total_payroll_support"] + expense["software_and_tools_support"]
@@ -143,7 +144,9 @@ def revenue():
             (data["total_revenue"] - expense["total_cogs"]) / data["total_revenue"]
         ).round(3) * 100
         
-        data = data.fillna(0)
+        #data = data.fillna(0)
+        data = data.replace([np.inf, -np.inf], np.nan)
+        data = data.where(data.notnull(), None)
         data = data.round(4)
         data = data.to_dict("records")
         data = json.dumps(data)
