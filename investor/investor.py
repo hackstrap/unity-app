@@ -53,6 +53,7 @@ def investment_summary():
         data = data[0]
         data = data["investment_summary"][0]
         data = data.replace([np.inf, -np.inf], np.nan)
+        data = data.where(data.notnull(), None)
 
         # data = data['investment_summary']
         return data
@@ -86,6 +87,7 @@ def startup_summary():
         data = data[0]
         data = data["startup_summary"][0]
         data = data.replace([np.inf, -np.inf], np.nan)
+        data = data.where(data.notnull(), None)
 
         # data = data['investment_summary']
         return data
@@ -136,6 +138,7 @@ def investment_total():
         data = json.loads(result.text)
         data = pd.DataFrame(data)
         data = data.replace([np.inf, -np.inf], np.nan)
+        data = data.where(data.notnull(), None)
 
         data = pd.DataFrame(data.groupby(by=["investor_id"])["amount"].sum())
         data = data.to_dict()
@@ -188,6 +191,7 @@ def startups_invested():
         data = json.loads(result.text)
         data = pd.DataFrame(data)
         data = data.replace([np.inf, -np.inf], np.nan)
+        data = data.where(data.notnull(), None)
 
         data = data.groupby(by=["investor_id"])["startup_id"].unique()
         data = data.to_json(orient="index")
@@ -245,6 +249,7 @@ def investor_startups():
 
         data = pd.DataFrame(startups_array["{}".format(investor_id)], columns=["startup_id"])
         data = data.replace([np.inf, -np.inf], np.nan)
+        data = data.where(data.notnull(), None)
 
         data = pd.merge(data, startups, on="startup_id")
         data = data.to_json(orient="index")
@@ -298,6 +303,7 @@ def investments_month():
         data = json.loads(result.text)
         data = pd.DataFrame(data)
         data = data.replace([np.inf, -np.inf], np.nan)
+        data = data.where(data.notnull(), None)
         data = data.groupby(by=["investor_id", "year", "month"])["amount"].sum()
         data = data.reset_index().to_json(orient="records")
         return data

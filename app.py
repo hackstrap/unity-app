@@ -84,6 +84,11 @@ def v1():
     return "List of v1 endpoints"
 
 
+@app.errorhandler(404)
+def page_not_found(error):
+    return "Aborted with 404", 404
+
+
 # FLASK_DEBUG=1 FLASK_APP=app.py flask run
 
 if __name__ == "__main__":

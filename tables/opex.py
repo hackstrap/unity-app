@@ -61,6 +61,7 @@ def opex():
         )
 
         data = data.replace([np.inf, -np.inf], np.nan)
+        data = data.where(data.notnull(), None)
         data = data.round(4)
         data = data.to_dict("records")
         data = json.dumps(data)
