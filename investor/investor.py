@@ -16,6 +16,9 @@ base_url = "https://blink.hackstrap.com/"
 
 PREFIX = "Bearer"
 
+default_portfolio = {'investor_id': '', 'investment_summary': [{'total_investment': 0.0, 'current_total_investment_value': 0.0, 'agg_net_irr_data': {'2020': [0.0, 0.0, 0.0, 0.0]}, 'startups_by': [{'filter': 'By Sector', 'data': [0.0, 0.0], 'labels': ['FinTech', 'SaaS']}], 'aggregate_multiple': 0.0, 'total_startups': 0, 'organization': ''}], 'startup_summary': [{'startup_id': '', 'total_money_invested': 0.0, 'current_investment_value': 0.0, 'multiple': 0.0, 'startup_net_irr_data': {'2020': [0.0, 0.0, 0.0, 0.0]}, 'investment_time': {'in_months': [0, 0], 'in_days': 0, 'in_years': 0.0}, 'organization': [{'fees': 0.0, 'carry': 0.0, 'one_time_fees': 0.0, 'name': '', 'discount': 0.0, 'valuation_cap': 0.0, 'entry_valuation': 0.0}]}]}
+
+
 
 def get_token(header):
     bearer, _, token = header.partition(" ")
@@ -45,15 +48,19 @@ def investment_summary():
         },
     )
     if result.text == "[]":
-        return jsonify([])
+        data = default_portfolio
+        data = data["investment_summary"][0]
+        return data
 
     else:
         data = json.loads(result.text)
 
+
+        #data = default_portfolio
+
+
         data = data[0]
         data = data["investment_summary"][0]
-        data = data.replace([np.inf, -np.inf], np.nan)
-        data = data.where(data.notnull(), None)
 
         # data = data['investment_summary']
         return data
@@ -79,15 +86,16 @@ def startup_summary():
         },
     )
     if result.text == "[]":
-        return jsonify([])
+        data = default_portfolio
+        data = data["startup_summary"][0]
+        return data
 
     else:
         data = json.loads(result.text)
 
         data = data[0]
         data = data["startup_summary"][0]
-        data = data.replace([np.inf, -np.inf], np.nan)
-        data = data.where(data.notnull(), None)
+
 
         # data = data['investment_summary']
         return data
