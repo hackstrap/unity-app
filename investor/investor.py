@@ -14,9 +14,11 @@ console = Console()
 
 base_url = "https://blink.hackstrap.com/"
 
+local_url = "http://127.0.0.1:5000/"
+
 PREFIX = "Bearer"
 
-default_portfolio = {'investor_id': '', 'investment_summary': [{'total_investment': 0.0, 'current_total_investment_value': 0.0, 'agg_net_irr_data': {'2020': [0.0, 0.0, 0.0, 0.0]}, 'startups_by': [{'filter': 'By Sector', 'data': [0.0, 0.0], 'labels': ['FinTech', 'SaaS']}], 'aggregate_multiple': 0.0, 'total_startups': 0, 'organization': ''}], 'startup_summary': [{'startup_id': '', 'total_money_invested': 0.0, 'current_investment_value': 0.0, 'multiple': 0.0, 'startup_net_irr_data': {'2020': [0.0, 0.0, 0.0, 0.0]}, 'investment_time': {'in_months': [0, 0], 'in_days': 0, 'in_years': 0.0}, 'organization': [{'fees': 0.0, 'carry': 0.0, 'one_time_fees': 0.0, 'name': '', 'discount': 0.0, 'valuation_cap': 0.0, 'entry_valuation': 0.0}]}]}
+default_portfolio = {'investor_id': '', 'investment_summary': [{'total_investment': None, 'current_total_investment_value': None, 'agg_net_irr_data': {'2021': [None, None, None, None]}, 'startups_by': [{'filter': 'By Sector', 'data': [], 'labels': []}], 'aggregate_multiple': None, 'total_startups': 0, 'organization': 'Tyke'}], 'startup_summary': [{'startup_id': '', 'total_money_invested': 0.0, 'current_investment_value': 0.0, 'multiple': 0.0, 'startup_net_irr_data': {'2020': [0.0, 0.0, 0.0, 0.0]}, 'investment_time': {'in_months': [0, 0], 'in_days': 0, 'in_years': 0.0}, 'organization': [{'fees': 0.0, 'carry': 0.0, 'one_time_fees': 0.0, 'name': 'Tyke', 'discount': 0.0, 'valuation_cap': 0.0, 'entry_valuation': 0.0}]}]}
 
 
 
@@ -38,32 +40,92 @@ def investment_summary():
     header = request.headers.get("Authorization")
     access_token = get_token(header)
 
-    result = requests.get(
+    startups_invested_result = requests.get(
         base_url
-        + "v1/portfolio?"
+        + "/unity/v1/investor/startups_invested?"
         + "page={}&page_size={}&investor_id={}".format(page, page_size, investor_id),
         headers={
             "Content-Type": "application/json",
             "Authorization": "Bearer {}".format(access_token),
         },
     )
-    if result.text == "[]":
-        data = default_portfolio
-        data = data["investment_summary"][0]
-        return data
+    
+
+    if startups_invested_result.json() == []:
+        return jsonify([])
+
 
     else:
-        data = json.loads(result.text)
 
 
-        #data = default_portfolio
+        investment_total_result = requests.get(
+        base_url
+        + "/unity/v1/investor/investment_total?"
+        + "page={}&page_size={}&investor_id={}".format(page, page_size, investor_id),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {}".format(access_token),
+        },
+    )
+
+        investor_startups_by_sectors_result = requests.get(
+        base_url
+        + "/unity/v1/investor/investor_startups_by_sectors?"
+        + "page={}&page_size={}&investor_id={}".format(page, page_size, investor_id),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {}".format(access_token),
+        },
+    )   
+        
+       
+        if investment_total_result.status_code == 200:
+            investment_total_result = investment_total_result.json()
+
+            if startups_invested_result.status_code == 200:
+                startups_invested_result = startups_invested_result.json()
+                #print(len(startups_invested_result["{}".format(investor_id)]))
+                #print(type(startups_invested_result["{}".format(investor_id)]))
+
+                if investor_startups_by_sectors_result.status_code == 200:
+                    investor_startups_by_sectors_result = investor_startups_by_sectors_result.json()
+                    #print(investor_startups_by_sectors_result[0])
+                    #print(investor_startups_by_sectors_result[1])
+
+                    data = default_portfolio      
+                    data = data["investment_summary"][0]
+                    data["total_investment"] = investment_total_result["amount"]["{}".format(investor_id)]
+                    data["total_startups"] = len(startups_invested_result["{}".format(investor_id)])
+
+                    print(data["startups_by"][0]["labels"])
+
+                    data["startups_by"][0]["data"] = investor_startups_by_sectors_result[1]
+                    data["startups_by"][0]["labels"] = investor_startups_by_sectors_result[0]
+                    return data
 
 
-        data = data[0]
-        data = data["investment_summary"][0]
+                #When investor_startups_by_sectors_result is not 200     
+                else:
 
-        # data = data['investment_summary']
-        return data
+                    data = default_portfolio      
+                    data = data["investment_summary"][0]
+                    data["total_investment"] = investment_total_result["amount"]["{}".format(investor_id)]
+                    data["total_startups"] = len(startups_invested_result["{}".format(investor_id)])
+                    return data
+
+            
+            #When investment_total_result is not 200    
+            else:
+                data = default_portfolio      
+                data = data["investment_summary"][0]
+                data["total_investment"] = investment_total_result["amount"]["{}".format(investor_id)]
+                return data
+           
+        #When investment_total_result is not 200    
+        else:
+            data = default_portfolio      
+            data = data["investment_summary"][0]
+            return data
 
 
 investor_startup_summary = Blueprint("investor_startup_summary", __name__)
@@ -76,28 +138,24 @@ def startup_summary():
     header = request.headers.get("Authorization")
     access_token = get_token(header)
 
-    result = requests.get(
+
+    startups_invested_result = requests.get(
         base_url
-        + "v1/portfolio?"
+        + "/unity/v1/investor/startups_invested?"
         + "page={}&page_size={}&investor_id={}".format(page, page_size, investor_id),
         headers={
             "Content-Type": "application/json",
             "Authorization": "Bearer {}".format(access_token),
         },
     )
-    if result.text == "[]":
-        data = default_portfolio
-        data = data["startup_summary"][0]
-        return data
+
+
+    if startups_invested_result.json() == []:
+        return jsonify([])
 
     else:
-        data = json.loads(result.text)
-
-        data = data[0]
+        data = default_portfolio 
         data = data["startup_summary"][0]
-
-
-        # data = data['investment_summary']
         return data
 
 
@@ -315,3 +373,105 @@ def investments_month():
         data = data.groupby(by=["investor_id", "year", "month"])["amount"].sum()
         data = data.reset_index().to_json(orient="records")
         return data
+
+
+
+investor_investor_startups_by_sectors = Blueprint("investor_investor_startups_by_sectors", __name__)
+
+@investor_investor_startups_by_sectors.route("/unity/v1/investor/investor_startups_by_sectors", methods=["GET"])
+def investor_startups_by_sectors():
+    page = request.args.get("page")
+    page_size = request.args.get("page_size")
+    investor_id = request.args.get("investor_id")
+    year = request.args.get("year")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
+
+    result = requests.get(
+        base_url
+        + "v1/investment?"
+        + "page={}&page_size={}&investor_id={}".format(page, page_size, investor_id),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {}".format(access_token),
+        },
+    )
+
+    startups = requests.get(
+        base_url + "v1/startup?" + "page={}&page_size={}".format(page, page_size),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {}".format(access_token),
+        },
+    )
+
+
+    if result.text == "[]":
+        return jsonify([])
+    
+    if startups.text == "[]":
+        return jsonify([])
+
+    else:
+        investment_data = json.loads(result.text)
+        investment_data = pd.DataFrame(investment_data)
+    
+
+        startups = json.loads(startups.text)
+        startups = pd.DataFrame(startups)
+        startups = startups[["startup_name" , "startup_id" , "sectors"]]
+        
+
+        startups_total = pd.merge(startups, investment_data, on="startup_id")
+        # print(startups_total)
+
+        startups_array = startups_total[["startup_id" , "sectors"]]
+        # print(startups_array)
+
+        
+
+
+        #startups_array = startups_array.groupby(by=["startup_id"])
+        startups_array = startups_array.groupby(by=["startup_id"])["sectors"].unique()
+        #startups_array.apply(print)
+        #print(startups_array)
+        #print(startups_array.reset_index(name='sectors'))
+
+        sectors_df = pd.DataFrame(startups_array.reset_index(name='sectors'))
+        #print(type(sectors_df["sectors"].iloc[0]))
+        x = sectors_df["sectors"].to_numpy()
+        
+        z = []
+        for i in x:
+            i = i[0]
+            z.append(i)
+        # print(z)
+        
+        
+
+        # print(x)
+        # print(type(x))
+
+        sectors_df["sectors"] = pd.DataFrame(z)
+
+        # print(sectors_df)
+        # print(type(sectors_df))
+        #print(sectors_df['sectors'].value_counts())
+
+        df = sectors_df['sectors'].value_counts().rename_axis('sectors').reset_index(name='counts')
+      
+        df["counts"] = (100. * df["counts"] / df["counts"].sum()).round(0)
+
+        #print(df)
+
+        list_of_sectors = df['sectors'].tolist()
+        list_of_counts = df['counts'].tolist()
+     
+
+        #return list of sectors and list of counts as json    
+        return jsonify(list_of_sectors, list_of_counts)  
+
+         
+       
+
+       

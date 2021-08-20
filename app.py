@@ -24,6 +24,7 @@ from investor.investor import investor_investment_total
 from investor.investor import investor_startups_invested
 from investor.investor import investor_investor_startups
 from investor.investor import investor_investments_month
+from investor.investor import investor_investor_startups_by_sectors
 
 
 #startups
@@ -63,7 +64,7 @@ app.register_blueprint(investor_investment_total)
 app.register_blueprint(investor_startups_invested)
 app.register_blueprint(investor_investor_startups)
 app.register_blueprint(investor_investments_month)
-
+app.register_blueprint(investor_investor_startups_by_sectors)
 
 app.register_blueprint(test_rev)
 app.register_blueprint(tables_product)
