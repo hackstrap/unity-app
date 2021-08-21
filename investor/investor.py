@@ -21,8 +21,9 @@ local_url = "http://127.0.0.1:5000/"
 PREFIX = "Bearer"
 
 
+from utils.default_data import default_portfolio
 
-default_portfolio = {'investor_id': '', 'investment_summary': [{'total_investment': None, 'current_total_investment_value': None, 'agg_net_irr_data': { }, 'startups_by': [{'filter': 'By Sector', 'data': [], 'labels': []}], 'aggregate_multiple': None, 'total_startups': 0, 'organization': 'Tyke'}], 'startup_summary': [{'startup_id': '', 'total_money_invested': 0.0, 'current_investment_value': 0.0, 'multiple': 0.0, 'startup_net_irr_data': {'2020': [0.0, 0.0, 0.0, 0.0]}, 'investment_time': {'in_months': [0, 0], 'in_days': 0, 'in_years': 0.0}, 'organization': [{'fees': 0.0, 'carry': 0.0, 'one_time_fees': 0.0, 'name': 'Tyke', 'discount': 0.0, 'valuation_cap': 0.0, 'entry_valuation': 0.0}]}]}
+
 
 
 

@@ -111,11 +111,11 @@ def users():
         - users["total_customers_churned"]
     )
         users["total_monthly_active_users_gr"] = (
-        users["total_monthly_active_users"].pct_change().round(3) * 100
+        users["total_monthly_active_users"].pct_change() * 100
     )
         users["customer_churn_rate"] = (
         users["total_customers_churned"] / users["total_customers_at_beginning_of_month"]
-        ).fillna(0).round(3) * 100
+        ) * 100
 
         if users["customer_churn_rate"].mean() < 1:
             users["customer_churn_rate"] = 0.833
@@ -123,14 +123,16 @@ def users():
             users = users.where(users.notnull(), None)
         else:
             users = users.replace([np.inf, -np.inf], np.nan)
+            users = users.round(4)
             users = users.where(users.notnull(), None)
             users = users.to_dict("records")
             users = json.dumps(users)
             return users
 
         users = users.replace([np.inf, -np.inf], np.nan)
-        users = users.where(users.notnull(), None)
         users = users.round(4)
+        users = users.where(users.notnull(), None)
+        
         users = users.to_dict("records")
         users = json.dumps(users)
         return users
@@ -152,12 +154,13 @@ def users():
         - users["total_customers_churned"]
     )
         users["total_monthly_active_users_gr"] = (
-        users["total_monthly_active_users"].pct_change().round(3) * 100
+        users["total_monthly_active_users"].pct_change() * 100
     )
         users["customer_churn_rate"] = (
         users["total_customers_churned"] / users["total_customers_at_beginning_of_month"]
-        ).round(3) * 100
+        ) * 100
         users = users.replace([np.inf, -np.inf], np.nan)
+        users = users.round(4)
 
 
         if users["customer_churn_rate"].mean() < 1:
@@ -166,26 +169,29 @@ def users():
             users["customer_acquisition_cost"] = (
                 opex["total_sales_and_marketing_expenses"]
                 / users["total_new_customers_acquired"]
-            ).round(3)
+            )
             
             if users["customer_acquisition_cost"].mean() < 1:
                 users["customer_acquisition_cost"] = 1
 
             else:
-                users = users.where(users.notnull(), None)
                 users = users.round(4)
+                users = users.where(users.notnull(), None)
+                
                 users = users.to_dict("records")
                 users = json.dumps(users)
                 return users
 
-            users = users.where(users.notnull(), None)
             users = users.round(4)
+            users = users.where(users.notnull(), None)
+            
             users = users.to_dict("records")
             users = json.dumps(users)
             return users
 
-        users = users.where(users.notnull(), None)
         users = users.round(4)
+        users = users.where(users.notnull(), None)
+        
         users = users.to_dict("records")
         users = json.dumps(users)
         return users
@@ -212,12 +218,13 @@ def users():
         - users["total_customers_churned"]
     )
         users["total_monthly_active_users_gr"] = (
-        users["total_monthly_active_users"].pct_change().round(3) * 100
+        users["total_monthly_active_users"].pct_change() * 100
     )
         users["customer_churn_rate"] = (
         users["total_customers_churned"] / users["total_customers_at_beginning_of_month"]
-        ).round(3) * 100
+        ) * 100
         users = users.replace([np.inf, -np.inf], np.nan)
+        users = users.round(4)
         users = users.where(users.notnull(), None)
 
         if users["customer_churn_rate"].mean() < 1:
@@ -246,14 +253,14 @@ def users():
                                 / users["total_customers_at_beginning_of_month"]
                             )
                         )
-                        .round(3)
                         * 100
                     )
-                ).round(3)
+                )
                 users["ltv_to_cac_ratio"] = (
                     users["customer_lifetime_value"] / users["customer_acquisition_cost"]
-                ).round(3)
+                )
                 users = users.replace([np.inf, -np.inf], np.nan)
+                users = users.round(4)
                 users = users.where(users.notnull(), None)
                 users = users.to_json(orient="records")
                 return users
@@ -272,14 +279,14 @@ def users():
                             / users["total_customers_at_beginning_of_month"]
                         )
                     )
-                    .round(3)
                     * 100
                 )
-            ).round(3)
+            )
             users["ltv_to_cac_ratio"] = (
                 users["customer_lifetime_value"] / users["customer_acquisition_cost"]
-            ).round(3)
+            )
             users = users.replace([np.inf, -np.inf], np.nan)
+            users = users.round(4)
             users = users.where(users.notnull(), None)
             users = users.to_json(orient="records")
             return users
@@ -287,7 +294,7 @@ def users():
         users["customer_acquisition_cost"] = (
             opex["total_sales_and_marketing_expenses"]
             / users["total_new_customers_acquired"]
-        ).round(3)
+        )
         users["customer_lifetime_value"] = (
             (revenue["total_mrr"] + revenue["total_non_recurring_revenue"])
             / (
@@ -302,18 +309,18 @@ def users():
                         / users["total_customers_at_beginning_of_month"]
                     )
                 )
-                .round(3)
                 * 100
             )
-        ).round(3)
+        )
         users["ltv_to_cac_ratio"] = (
             users["customer_lifetime_value"] / users["customer_acquisition_cost"]
-        ).round(3)
+        )
 
         users = users.replace([np.inf, -np.inf], np.nan)
+        users = users.round(4)
         users = users.where(users.notnull(), None)
 
-        users = users.round(4)
+        
         users = users.to_json(orient="records")
         return users
 
