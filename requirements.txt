@@ -1,6 +1,6 @@
 appdirs==1.4.4
-astroid==2.5.1
 arrow==1.1.1
+astroid==2.5.1
 black==21.6b0
 botocore==1.20.75
 certifi==2020.12.5
@@ -8,11 +8,10 @@ chardet==4.0.0
 click==8.0.1
 colorama==0.4.4
 commonmark==0.9.1
-dateutil==2.8.2
 dnspython==1.16.0
 docopt==0.6.2
 Flask==2.0.1
-flask_cors==3.0.10
+Flask-Cors==3.0.10
 idna==2.10
 isort==5.8.0
 itsdangerous==2.0.1
@@ -47,6 +46,10 @@ QScintilla==2.12.1
 regex==2021.4.4
 requests==2.25.1
 rich==10.4.0
+sip==6.1.1
 six==1.16.0
+toml==0.10.2
+urllib3==1.26.4
+Werkzeug==2.0.1
 wrapt==1.12.1
 yarg==0.1.9
