@@ -96,24 +96,25 @@ def revenue():
 
         data = data.sort_values(by="month")
 
-        
+        print(data)
 
         data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
         
         data["total_revenue_gr"] = (
-            data["total_revenue"].pct_change().round(3) * 100
+            data["total_revenue"].pct_change() * 100
             )
         
-        data["total_mrr_gr"] = data["total_mrr"].pct_change().round(3) * 100
+        data["total_mrr_gr"] = data["total_mrr"].pct_change() * 100
         
 
         data = data.replace([np.inf, -np.inf], np.nan)
         #data = data.fillna(0)
-        data = data.where(data.notnull(), None)
         data = data.round(4)
+        data = data.where(data.notnull(), None)
+        
         data = data.to_dict("records")
         data = json.dumps(data)
-        return data
+        return "data"
 
 
     else:
@@ -122,19 +123,23 @@ def revenue():
 
         data = data.sort_values(by="month")
         
+        
+        
         expense = json.loads(expense.text)
         expense = pd.DataFrame(expense)
         
         expense = expense.sort_values(by="month")
         
+       
+        
         data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
-        print(data)
+        #print(data)
         data["total_revenue_gr"] = (
-            data["total_revenue"].pct_change().round(3) * 100
+            data["total_revenue"].pct_change() * 100
             )
-        print(data)
-        data["total_mrr_gr"] = data["total_mrr"].pct_change().round(3) * 100
-        print(data)
+        #print(data)
+        data["total_mrr_gr"] = data["total_mrr"].pct_change() * 100
+        #print(data)
         
         expense["total_customer_support_expenses"] = (
         expense["total_payroll_support"] + expense["software_and_tools_support"]
@@ -154,12 +159,13 @@ def revenue():
         
         data["gross_profit_margin"] = (
             (data["total_revenue"] - expense["total_cogs"]) / data["total_revenue"]
-        ).round(3) * 100
+        ) * 100
         
         #data = data.fillna(0)
         data = data.replace([np.inf, -np.inf], np.nan)
-        data = data.where(data.notnull(), None)
         data = data.round(4)
+        data = data.where(data.notnull(), None)
+        
         data = data.to_dict("records")
         data = json.dumps(data)
         return data
