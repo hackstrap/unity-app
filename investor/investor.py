@@ -1,5 +1,7 @@
 import json
 from datetime import datetime
+import arrow as arw
+import math
 
 import numpy as np
 import pandas as pd
@@ -18,7 +20,9 @@ local_url = "http://127.0.0.1:5000/"
 
 PREFIX = "Bearer"
 
-default_portfolio = {'investor_id': '', 'investment_summary': [{'total_investment': None, 'current_total_investment_value': None, 'agg_net_irr_data': {'2021': [None, None, None, None]}, 'startups_by': [{'filter': 'By Sector', 'data': [], 'labels': []}], 'aggregate_multiple': None, 'total_startups': 0, 'organization': 'Tyke'}], 'startup_summary': [{'startup_id': '', 'total_money_invested': 0.0, 'current_investment_value': 0.0, 'multiple': 0.0, 'startup_net_irr_data': {'2020': [0.0, 0.0, 0.0, 0.0]}, 'investment_time': {'in_months': [0, 0], 'in_days': 0, 'in_years': 0.0}, 'organization': [{'fees': 0.0, 'carry': 0.0, 'one_time_fees': 0.0, 'name': 'Tyke', 'discount': 0.0, 'valuation_cap': 0.0, 'entry_valuation': 0.0}]}]}
+
+
+default_portfolio = {'investor_id': '', 'investment_summary': [{'total_investment': None, 'current_total_investment_value': None, 'agg_net_irr_data': { }, 'startups_by': [{'filter': 'By Sector', 'data': [], 'labels': []}], 'aggregate_multiple': None, 'total_startups': 0, 'organization': 'Tyke'}], 'startup_summary': [{'startup_id': '', 'total_money_invested': 0.0, 'current_investment_value': 0.0, 'multiple': 0.0, 'startup_net_irr_data': {'2020': [0.0, 0.0, 0.0, 0.0]}, 'investment_time': {'in_months': [0, 0], 'in_days': 0, 'in_years': 0.0}, 'organization': [{'fees': 0.0, 'carry': 0.0, 'one_time_fees': 0.0, 'name': 'Tyke', 'discount': 0.0, 'valuation_cap': 0.0, 'entry_valuation': 0.0}]}]}
 
 
 
@@ -39,6 +43,8 @@ def investment_summary():
     investor_id = request.args.get("investor_id")
     header = request.headers.get("Authorization")
     access_token = get_token(header)
+    now_year_India = arw.now('Asia/Kolkata').year
+
 
     startups_invested_result = requests.get(
         base_url
@@ -77,8 +83,12 @@ def investment_summary():
             "Authorization": "Bearer {}".format(access_token),
         },
     )   
+
         
-       
+        
+        
+
+
         if investment_total_result.status_code == 200:
             investment_total_result = investment_total_result.json()
 
@@ -97,10 +107,18 @@ def investment_summary():
                     data["total_investment"] = investment_total_result["amount"]["{}".format(investor_id)]
                     data["total_startups"] = len(startups_invested_result["{}".format(investor_id)])
 
-                    print(data["startups_by"][0]["labels"])
+                    #print(data["startups_by"][0]["labels"])
 
                     data["startups_by"][0]["data"] = investor_startups_by_sectors_result[1]
                     data["startups_by"][0]["labels"] = investor_startups_by_sectors_result[0]
+                    
+                    #calculate investor_agg_irr)
+                    year_instance = arw.now('Asia/Kolkata')
+                    no_of_quaters = math.ceil(year_instance.month/3.)
+                    investor_agg_irr = ([None] * no_of_quaters)
+      
+                    data["agg_net_irr_data"]["{}".format(now_year_India)] = investor_agg_irr
+            
                     return data
 
 
@@ -111,6 +129,14 @@ def investment_summary():
                     data = data["investment_summary"][0]
                     data["total_investment"] = investment_total_result["amount"]["{}".format(investor_id)]
                     data["total_startups"] = len(startups_invested_result["{}".format(investor_id)])
+                    
+                    #calculate investor_agg_irr)
+                    year_instance = arw.now('Asia/Kolkata')
+                    no_of_quaters = math.ceil(year_instance.month/3.)
+                    investor_agg_irr = ([None] * no_of_quaters)
+      
+                    data["agg_net_irr_data"]["{}".format(now_year_India)] = investor_agg_irr
+                              
                     return data
 
             
@@ -119,12 +145,28 @@ def investment_summary():
                 data = default_portfolio      
                 data = data["investment_summary"][0]
                 data["total_investment"] = investment_total_result["amount"]["{}".format(investor_id)]
+                
+                #calculate investor_agg_irr)
+                year_instance = arw.now('Asia/Kolkata')
+                no_of_quaters = math.ceil(year_instance.month/3.)
+                investor_agg_irr = ([None] * no_of_quaters)
+      
+                data["agg_net_irr_data"]["{}".format(now_year_India)] = investor_agg_irr
+                 
                 return data
            
         #When investment_total_result is not 200    
         else:
             data = default_portfolio      
             data = data["investment_summary"][0]
+            
+            #calculate investor_agg_irr)
+            year_instance = arw.now('Asia/Kolkata')
+            no_of_quaters = math.ceil(year_instance.month/3.)
+            investor_agg_irr = ([None] * no_of_quaters)
+      
+            data["agg_net_irr_data"]["{}".format(now_year_India)] = investor_agg_irr
+            
             return data
 
 
