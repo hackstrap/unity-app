@@ -74,31 +74,42 @@ def expenses():
 
     if result.text == "[]":
         return jsonify([])
+    
+    
     else:
         data = json.loads(result.text)
+        print(result.text)
         data = pd.DataFrame(data)
         data = data.sort_values(by="month")
+        
 
         data["total_customer_support_expenses"] = (
             data["total_payroll_support"] + data["software_and_tools_support"]
         )
+        
         data["total_service_delivery_expenses"] = data["hosting_service_delivery"]
+        
+        
         data["total_cost_of_goods_manufactured"] = (
         data["direct_material_costs"]
         + data["direct_labor_costs"]
         + data["manufacturing_overhead"]
         + data["net_wip_inventory"]
-        )
-        data["total_cogs"] = (
-        data["total_cost_of_goods_manufactured"]
         + data["net_finished_goods_inventory"]
+        )
+        
+        
+        
+        data["total_cogs"] = (data["total_customer_support_expenses"] + data["total_service_delivery_expenses"]
+        + data["total_cost_of_goods_manufactured"]
         + data["total_other_cogs"]
         )
+        #print(data["total_cogs"])
 
         data = data.replace([np.inf, -np.inf], np.nan)
         data = data.round(4)
         data = data.where(data.notnull(), None)
-
+        
         data = data.to_dict("records")
         data = json.dumps(data)
         return data

@@ -5,6 +5,7 @@ import math
 
 import numpy as np
 import pandas as pd
+
 import requests
 from flask import Blueprint, jsonify, request
 from flask_cors import CORS, cross_origin
@@ -14,6 +15,9 @@ from requests.exceptions import HTTPError
 from rich.console import Console
 console = Console()
 
+
+from utils.default_data import default_portfolio
+
 base_url = "https://blink.hackstrap.com/"
 
 local_url = "http://127.0.0.1:5000/"
@@ -21,7 +25,7 @@ local_url = "http://127.0.0.1:5000/"
 PREFIX = "Bearer"
 
 
-from utils.default_data import default_portfolio
+
 
 
 

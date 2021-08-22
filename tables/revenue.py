@@ -12,6 +12,8 @@ from requests.exceptions import HTTPError
 from rich.console import Console
 console = Console()
 
+from utils import helpers
+
 base_url = "https://blink.hackstrap.com/"
 
 PREFIX = "Bearer"
@@ -100,11 +102,8 @@ def revenue():
 
         data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
         
-        data["total_revenue_gr"] = (
-            data["total_revenue"].pct_change() * 100
-            )
-        
-        data["total_mrr_gr"] = data["total_mrr"].pct_change() * 100
+        data["total_revenue_gr"] = helpers.pct_change(data["total_revenue"])
+        data["total_mrr_gr"] = helpers.pct_change(data["total_mrr"])
         
 
         data = data.replace([np.inf, -np.inf], np.nan)
@@ -114,7 +113,7 @@ def revenue():
         
         data = data.to_dict("records")
         data = json.dumps(data)
-        return "data"
+        return data
 
 
     else:
@@ -133,13 +132,10 @@ def revenue():
        
         
         data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
-        #print(data)
-        data["total_revenue_gr"] = (
-            data["total_revenue"].pct_change() * 100
-            )
-        #print(data)
-        data["total_mrr_gr"] = data["total_mrr"].pct_change() * 100
-        #print(data)
+       
+        data["total_revenue_gr"] = helpers.pct_change(data["total_revenue"])
+        data["total_mrr_gr"] = helpers.pct_change(data["total_mrr"])
+       
         
         expense["total_customer_support_expenses"] = (
         expense["total_payroll_support"] + expense["software_and_tools_support"]

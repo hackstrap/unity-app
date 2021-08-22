@@ -111,11 +111,11 @@ def users():
         - users["total_customers_churned"]
     )
         users["total_monthly_active_users_gr"] = (
-        users["total_monthly_active_users"].pct_change() * 100
+        users["total_monthly_active_users"].pct_change().fillna(0) * 100
     )
         users["customer_churn_rate"] = (
         users["total_customers_churned"] / users["total_customers_at_beginning_of_month"]
-        ) * 100
+        ).fillna(0) * 100
 
         if users["customer_churn_rate"].mean() < 1:
             users["customer_churn_rate"] = 0.833
@@ -154,11 +154,11 @@ def users():
         - users["total_customers_churned"]
     )
         users["total_monthly_active_users_gr"] = (
-        users["total_monthly_active_users"].pct_change() * 100
+        users["total_monthly_active_users"].pct_change().fillna(0) * 100
     )
         users["customer_churn_rate"] = (
         users["total_customers_churned"] / users["total_customers_at_beginning_of_month"]
-        ) * 100
+        ).fillna(0) * 100
         users = users.replace([np.inf, -np.inf], np.nan)
         users = users.round(4)
 
@@ -169,7 +169,7 @@ def users():
             users["customer_acquisition_cost"] = (
                 opex["total_sales_and_marketing_expenses"]
                 / users["total_new_customers_acquired"]
-            )
+            ).fillna(0)
             
             if users["customer_acquisition_cost"].mean() < 1:
                 users["customer_acquisition_cost"] = 1
@@ -200,14 +200,17 @@ def users():
     else:
         users = json.loads(users.text)
         users = pd.DataFrame(users)
+        users = users.fillna(0)
         users = users.sort_values(by="month")
 
         revenue = json.loads(revenue.text)
         revenue = pd.DataFrame(revenue)
+        revenue = revenue.fillna(0)
         revenue = revenue.sort_values(by="month")
 
         opex = json.loads(opex.text)
         opex = pd.DataFrame(opex)
+        opex = opex.fillna(0)
         opex = opex.sort_values(by="month")
 
 
@@ -218,11 +221,12 @@ def users():
         - users["total_customers_churned"]
     )
         users["total_monthly_active_users_gr"] = (
-        users["total_monthly_active_users"].pct_change() * 100
+        users["total_monthly_active_users"].pct_change().fillna(0) * 100
     )
         users["customer_churn_rate"] = (
         users["total_customers_churned"] / users["total_customers_at_beginning_of_month"]
-        ) * 100
+        ).fillna(0) * 100
+        
         users = users.replace([np.inf, -np.inf], np.nan)
         users = users.round(4)
         users = users.where(users.notnull(), None)
@@ -233,7 +237,7 @@ def users():
             users["customer_acquisition_cost"] = (
                 opex["total_sales_and_marketing_expenses"]
                 / users["total_new_customers_acquired"]
-            ).round(3)
+            ).fillna(0).round(3)
 
             if users["customer_acquisition_cost"].mean() < 1:
                 users["customer_acquisition_cost"] = 1
@@ -246,19 +250,19 @@ def users():
                             users["total_customers_at_beginning_of_month"]
                             + users["total_new_customers_acquired"]
                             - users["total_customers_churned"]
-                        )
+                        ).fillna(0)
                         * (
                             (
                                 users["total_customers_churned"]
                                 / users["total_customers_at_beginning_of_month"]
-                            )
-                        )
+                            ).fillna(0)
+                        ).fillna(0)
                         * 100
-                    )
+                    ).fillna(0)
                 )
                 users["ltv_to_cac_ratio"] = (
                     users["customer_lifetime_value"] / users["customer_acquisition_cost"]
-                )
+                ).fillna(0)
                 users = users.replace([np.inf, -np.inf], np.nan)
                 users = users.round(4)
                 users = users.where(users.notnull(), None)
@@ -272,19 +276,19 @@ def users():
                         users["total_customers_at_beginning_of_month"]
                         + users["total_new_customers_acquired"]
                         - users["total_customers_churned"]
-                    )
+                    ).fillna(0)
                     * (
                         (
                             users["total_customers_churned"]
                             / users["total_customers_at_beginning_of_month"]
-                        )
-                    )
+                        ).fillna(0)
+                    ).fillna(0)
                     * 100
-                )
+                ).fillna(0)
             )
             users["ltv_to_cac_ratio"] = (
                 users["customer_lifetime_value"] / users["customer_acquisition_cost"]
-            )
+            ).fillna(0)
             users = users.replace([np.inf, -np.inf], np.nan)
             users = users.round(4)
             users = users.where(users.notnull(), None)
@@ -294,7 +298,7 @@ def users():
         users["customer_acquisition_cost"] = (
             opex["total_sales_and_marketing_expenses"]
             / users["total_new_customers_acquired"]
-        )
+        ).fillna(0)
         users["customer_lifetime_value"] = (
             (revenue["total_mrr"] + revenue["total_non_recurring_revenue"])
             / (
@@ -302,19 +306,19 @@ def users():
                     users["total_customers_at_beginning_of_month"]
                     + users["total_new_customers_acquired"]
                     - users["total_customers_churned"]
-                )
+                ).fillna(0)
                 * (
                     (
                         users["total_customers_churned"]
                         / users["total_customers_at_beginning_of_month"]
-                    )
-                )
+                    ).fillna(0)
+                ).fillna(0)
                 * 100
             )
         )
         users["ltv_to_cac_ratio"] = (
             users["customer_lifetime_value"] / users["customer_acquisition_cost"]
-        )
+        ).fillna(0)
 
         users = users.replace([np.inf, -np.inf], np.nan)
         users = users.round(4)
