@@ -314,7 +314,7 @@ def users():
                     ).fillna(0)
                 ).fillna(0)
                 * 100
-            )
+            ).fillna(0)
         )
         users["ltv_to_cac_ratio"] = (
             users["customer_lifetime_value"] / users["customer_acquisition_cost"]
