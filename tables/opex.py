@@ -54,7 +54,8 @@ def opex():
     else:
         data = json.loads(result.text)
         data = pd.DataFrame(data)
-        data = data.sort_values(by="month")
+        data = data.fillna(value=np.nan)
+        data = data.sort_values(by="month", ascending=True)
 
         data["total_opex_expenses"] = (
             data["total_general_and_administrative_expenses"]

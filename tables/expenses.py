@@ -78,17 +78,22 @@ def expenses():
     
     else:
         data = json.loads(result.text)
-        print(result.text)
+        # print(result.text)
         data = pd.DataFrame(data)
-        data = data.sort_values(by="month")
-        
+        data = data.fillna(value=np.nan)
+        data = data.sort_values(by="month", ascending=True)
+        #print(data)
+       
 
         data["total_customer_support_expenses"] = (
             data["total_payroll_support"] + data["software_and_tools_support"]
         )
         
+        #print(data["total_customer_support_expenses"])
+        
         data["total_service_delivery_expenses"] = data["hosting_service_delivery"]
         
+        #print(data["total_service_delivery_expenses"])
         
         data["total_cost_of_goods_manufactured"] = (
         data["direct_material_costs"]
@@ -98,14 +103,22 @@ def expenses():
         + data["net_finished_goods_inventory"]
         )
         
+        #print(data["total_cost_of_goods_manufactured"])
         
+        data["total_other_cogs"] = data["total_other_cogs"].fillna(value=np.nan)
         
-        data["total_cogs"] = (data["total_customer_support_expenses"] + data["total_service_delivery_expenses"]
-        + data["total_cost_of_goods_manufactured"]
-        + data["total_other_cogs"]
-        )
+        #print(data["total_other_cogs"])
+        
+        data["total_cogs"] = data["total_customer_support_expenses"] + data["total_service_delivery_expenses"]  + data["total_cost_of_goods_manufactured"]
+        
+        data["total_cogs"] = data["total_cogs"]+ data["total_other_cogs"].fillna(0) 
+        
         #print(data["total_cogs"])
-
+        
+        
+        #print(data["total_cogs"])
+        
+        
         data = data.replace([np.inf, -np.inf], np.nan)
         data = data.round(4)
         data = data.where(data.notnull(), None)
