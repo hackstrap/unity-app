@@ -77,7 +77,7 @@ def revenue():
     #----------------------------------------------------------------
     expense = requests.get(
        base_url
-       + "v1/expense?"
+       + "unity/v1/expenses?"
        + "page={}&page_size={}&startup_id={}&year={}".format(
            page, page_size, startup_id, year
        ),
@@ -95,10 +95,10 @@ def revenue():
     elif expense.text == "[]":
         data = json.loads(result.text)
         data = pd.DataFrame(data)
+        data = data.fillna(value=np.nan)
+        data = data.sort_values(by="month", ascending=True)
 
-        data = data.sort_values(by="month")
-
-        print(data)
+        #print(data)
 
         data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
         
@@ -119,15 +119,16 @@ def revenue():
     else:
         data = json.loads(result.text)
         data = pd.DataFrame(data)
-
-        data = data.sort_values(by="month")
+        data = data.fillna(value=np.nan)
+        data = data.sort_values(by="month", ascending=True)
         
         
         
         expense = json.loads(expense.text)
         expense = pd.DataFrame(expense)
         
-        expense = expense.sort_values(by="month")
+        expense = expense.fillna(value=np.nan)
+        expense= expense.sort_values(by="month", ascending=True)
         
        
         
@@ -152,12 +153,16 @@ def revenue():
             + expense["net_finished_goods_inventory"]
             + expense["total_other_cogs"]
             )
+       
+        #print(data["total_revenue"])
+        #print(expense["total_cogs"])
         
         data["gross_profit_margin"] = (
             (data["total_revenue"].fillna(0) - expense["total_cogs"].fillna(0)) / data["total_revenue"].fillna(0)
         ) * 100
         
-        #data = data.fillna(0)
+        #print(data["gross_profit_margin"])
+        
         data = data.replace([np.inf, -np.inf], np.nan)
         data = data.round(4)
         data = data.where(data.notnull(), None)
