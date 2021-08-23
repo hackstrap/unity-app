@@ -129,7 +129,7 @@ def revenue():
         
         expense = expense.fillna(value=np.nan)
         expense= expense.sort_values(by="month", ascending=True)
-        
+        #print(expense["total_cogs"])
        
         
         data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
@@ -138,24 +138,10 @@ def revenue():
         data["total_mrr_gr"] = helpers.pct_change(data["total_mrr"])
        
         
-        expense["total_customer_support_expenses"] = (
-        expense["total_payroll_support"] + expense["software_and_tools_support"]
-            )
-        expense["total_service_delivery_expenses"] = expense["hosting_service_delivery"]
-        expense["total_cost_of_goods_manufactured"] = (
-            expense["direct_material_costs"]
-            + expense["direct_labor_costs"]
-            + expense["manufacturing_overhead"]
-            + expense["net_wip_inventory"]
-            )
-        expense["total_cogs"] = (
-            expense["total_cost_of_goods_manufactured"]
-            + expense["net_finished_goods_inventory"]
-            + expense["total_other_cogs"]
-            )
+      
        
         #print(data["total_revenue"])
-        #print(expense["total_cogs"])
+        print(expense["total_cogs"])
         
         data["gross_profit_margin"] = (
             (data["total_revenue"].fillna(0) - expense["total_cogs"].fillna(0)) / data["total_revenue"].fillna(0)
