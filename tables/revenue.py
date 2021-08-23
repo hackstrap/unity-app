@@ -154,7 +154,7 @@ def revenue():
             )
         
         data["gross_profit_margin"] = (
-            (data["total_revenue"] - expense["total_cogs"]) / data["total_revenue"]
+            (data["total_revenue"].fillna(0) - expense["total_cogs"].fillna(0)) / data["total_revenue"].fillna(0)
         ) * 100
         
         #data = data.fillna(0)
