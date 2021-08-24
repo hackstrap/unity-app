@@ -21,8 +21,10 @@ default_portfolio = {
             "current_investment_value_bool": True,
             "startup_net_irr_bool": True,
             "multiple": 0.0,
-            "startup_net_irr_data": {"2021": [0.0, 0.0, 0.0, 0.0]},
-            "investment_time": {"in_months": [0, 0], "in_days": 0, "in_years": 0.0},
+            "startup_net_irr_data": {},
+            "investment_time": {"in_year_month_day": [], 
+                                "in_days": 0, 
+                                "startup_total_number_of_transactions": 0},
             "organization": [
                 {
                     "fees": 0.0,

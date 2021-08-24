@@ -1,5 +1,9 @@
 import json
 from datetime import datetime
+import datetime
+import pytz
+from dateutil.relativedelta import relativedelta
+from dateutil import parser
 import arrow as arw
 import math
 
@@ -184,7 +188,8 @@ def startup_summary():
     investor_id = request.args.get("investor_id")
     header = request.headers.get("Authorization")
     access_token = get_token(header)
-
+    now_year_India = arw.now('Asia/Kolkata').year
+    
 
     startups_invested_result = requests.get(
         base_url
@@ -217,6 +222,7 @@ def investment_total():
     year = request.args.get("year")
     header = request.headers.get("Authorization")
     access_token = get_token(header)
+    
 
     if year == None:
         result = requests.get(
@@ -519,6 +525,149 @@ def investor_startups_by_sectors():
         return jsonify(list_of_sectors, list_of_counts)  
 
          
+investor_startup_investment_total = Blueprint("investor_startup_investment_total", __name__)
+
+@investor_startup_investment_total.route("/unity/v1/investor/startup_investment_total", methods=["GET"])
+def startup_investment_total():
+    page = request.args.get("page")
+    page_size = request.args.get("page_size")
+    investor_id = request.args.get("investor_id")
+    startup_id = request.args.get("startup_id")
+    year = request.args.get("year")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
+    now_year_India = arw.now('Asia/Kolkata').year
+    now_India = arw.now('Asia/Kolkata')
+    tz_India_info = 'Asia/Kolkata'
+    
+    
+    if year == None:
+        result = requests.get(
+            base_url
+            + "v1/investment?"
+            + "page={}&page_size={}&investor_id={}".format(
+                page, page_size, investor_id
+            ),
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {}".format(access_token),
+            },
+        )
+
+    else:
+        result = requests.get(
+            base_url
+            + "v1/investment?"
+            + "page={}&page_size={}&investor_id={}&year={}".format(
+                page, page_size, investor_id, year
+            ),
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {}".format(access_token),
+            },
+        )
+
+    #print(result.text)
+    
+    if result.text == "[]":
+        return jsonify([])
+
+    else:
+        data = json.loads(result.text)
+        data = pd.DataFrame(data)
+        data = data.replace([np.inf, -np.inf], np.nan)
+        data = data.where(data.notnull(), None)
+        
+        data_startup_invested = data[["startup_id", "campaign_id", "date", "amount"]]
+        
+        
+        
+        data_startup_invested = data_startup_invested.loc[data_startup_invested['startup_id'] == "{}".format(startup_id)]
+        data_startup_invested = data_startup_invested.sort_values(by = 'date', ascending = True)
+        
+        #print(data_startup_invested)
+        
+        #Number of transactions made in the startup (shape[0] is the number of transactions)
+        startup_total_number_of_transactions = data_startup_invested.shape[0]
+        #print(startup_total_number_of_transactions)
+        
+        #Total amount invested in the startup
+        startup_total_amount = data_startup_invested.groupby(by=["startup_id"])["amount"].sum()
+        
+        try: 
+            total_money_invested = startup_total_amount[0]
+        except:
+            return "Index Error Exception Raised in total_money_invested"
+            
+        #print(total_money_invested)
+        
+        #date first invested in a startup
+        #first_date = data_startup_invested['date'].min()
+        #print(first_date)
+        
+        #sort data by date
+        data_startup_invested = data_startup_invested.sort_values(by = 'date', ascending = True)
+        data_startup_invested['date'] = data_startup_invested['date'].apply(parser.parse)
+        
+        try:
+            first_date_of_transaction = data_startup_invested['date'].iloc[0]
+        except:
+            return "Index Error Exception Raised in first_date_of_transaction"
+        
+        #Converting pandas.tslib.Timestamp to datetime python object
+        
+        first_date_of_transaction = first_date_of_transaction.to_pydatetime()
+
+        #print(data_startup_invested)
+        #print(first_date_of_transaction)
+        
+        
+        
+        # add time zone to date string to get datetime object
+        #first_date_of_transaction = first_date_of_transaction + tz.tzoffset('IST', 19800)
+        
+        #print((first_date_of_transaction))
+        
+        first_date_of_transaction_with_timezone = first_date_of_transaction.astimezone(pytz.timezone('Asia/Calcutta'))
+        
+ 
+        #print(type(first_date_of_transaction_with_timezone))
+        #print((first_date_of_transaction_with_timezone))
+        #data_startup_invested_parsed
+        
+      
+        now_India_dt = datetime.datetime.now(pytz.timezone('Asia/Calcutta'))
+        #print(now_India)
+        #print(now_India_dt)
+        
+        #calculate investment time in years and months since date of first transaction made in the startup 
+        investment_time_diff = relativedelta(now_India_dt, first_date_of_transaction_with_timezone)
+        investment_time_in_years_months_days = [investment_time_diff.years, investment_time_diff.months, investment_time_diff.days]
+        #print(investment_time_in_years_months_days)
+        
+        investment_time_in_days_diff = now_India_dt - first_date_of_transaction_with_timezone
+        investment_time_in_days =investment_time_in_days_diff.days
+        #print((investment_time_in_days))
+        
+        startup_summary_data = {
+            "startup_id": "{}".format(startup_id),
+            "total_money_invested": 0.0, 
+            "investment_time": {"in_year_month_day": [], 
+                                "in_days": 0, 
+                                "startup_total_number_of_transactions": 0}
+        }
+
+        #print(type(investment_time_in_days))
+                
+        startup_summary_data["total_money_invested"] = float(total_money_invested)
+        startup_summary_data["investment_time"]["in_year_month_day"] = investment_time_in_years_months_days
+        startup_summary_data["investment_time"]["in_days"] = investment_time_in_days
+        startup_summary_data["investment_time"]["startup_total_number_of_transactions"] = int(startup_total_number_of_transactions)
+        
+        
+        
+        data = startup_summary_data
+        return data
        
 
        
