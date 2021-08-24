@@ -21,6 +21,7 @@ from tables.opex import tables_opex
 from investor.investor import investor_investment_summary
 from investor.investor import investor_startup_summary
 from investor.investor import investor_investment_total
+from investor.investor import investor_startup_investment_total
 from investor.investor import investor_startups_invested
 from investor.investor import investor_investor_startups
 from investor.investor import investor_investments_month
@@ -61,6 +62,7 @@ app.register_blueprint(tables_opex)
 app.register_blueprint(investor_investment_summary)
 app.register_blueprint(investor_startup_summary)
 app.register_blueprint(investor_investment_total)
+app.register_blueprint(investor_startup_investment_total)
 app.register_blueprint(investor_startups_invested)
 app.register_blueprint(investor_investor_startups)
 app.register_blueprint(investor_investments_month)
