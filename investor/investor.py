@@ -1,22 +1,21 @@
-import json
-from datetime import datetime
 import datetime
-import pytz
-from dateutil.relativedelta import relativedelta
-from dateutil import parser
-import arrow as arw
+import json
 import math
+from datetime import datetime
 
+import arrow as arw
 import numpy as np
 import pandas as pd
-
+import pytz
 import requests
+from dateutil import parser
+from dateutil.relativedelta import relativedelta
 from flask import Blueprint, jsonify, request
 from flask_cors import CORS, cross_origin
-
 from requests.api import get
 from requests.exceptions import HTTPError
 from rich.console import Console
+
 console = Console()
 
 
@@ -29,12 +28,6 @@ local_url = "http://127.0.0.1:5000/"
 PREFIX = "Bearer"
 
 
-
-
-
-
-
-
 def get_token(header):
     bearer, _, token = header.partition(" ")
     if bearer != PREFIX:
@@ -42,18 +35,21 @@ def get_token(header):
 
     return token
 
+
 investor_investment_summary = Blueprint("investor_investment_summary", __name__)
 CORS(investor_investment_summary)
 
-@investor_investment_summary.route("/unity/v1/investor/investment_summary", methods=["GET"])
+
+@investor_investment_summary.route(
+    "/unity/v1/investor/investment_summary", methods=["GET"]
+)
 def investment_summary():
     page = request.args.get("page")
     page_size = request.args.get("page_size")
     investor_id = request.args.get("investor_id")
     header = request.headers.get("Authorization")
     access_token = get_token(header)
-    now_year_India = arw.now('Asia/Kolkata').year
-
+    now_year_India = arw.now("Asia/Kolkata").year
 
     startups_invested_result = requests.get(
         base_url
@@ -64,155 +60,219 @@ def investment_summary():
             "Authorization": "Bearer {}".format(access_token),
         },
     )
-    
 
     if startups_invested_result.json() == []:
         return jsonify([])
 
-
     else:
 
-
         investment_total_result = requests.get(
-        base_url
-        + "/unity/v1/investor/investment_total?"
-        + "page={}&page_size={}&investor_id={}".format(page, page_size, investor_id),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
+            base_url
+            + "/unity/v1/investor/investment_total?"
+            + "page={}&page_size={}&investor_id={}".format(
+                page, page_size, investor_id
+            ),
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {}".format(access_token),
+            },
+        )
 
         investor_startups_by_sectors_result = requests.get(
-        base_url
-        + "/unity/v1/investor/investor_startups_by_sectors?"
-        + "page={}&page_size={}&investor_id={}".format(page, page_size, investor_id),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )   
-
-        
-        
-        
-
+            base_url
+            + "/unity/v1/investor/investor_startups_by_sectors?"
+            + "page={}&page_size={}&investor_id={}".format(
+                page, page_size, investor_id
+            ),
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {}".format(access_token),
+            },
+        )
 
         if investment_total_result.status_code == 200:
             investment_total_result = investment_total_result.json()
 
             if startups_invested_result.status_code == 200:
                 startups_invested_result = startups_invested_result.json()
-                #print(len(startups_invested_result["{}".format(investor_id)]))
-                #print(type(startups_invested_result["{}".format(investor_id)]))
+                # print(len(startups_invested_result["{}".format(investor_id)]))
+                # print(type(startups_invested_result["{}".format(investor_id)]))
 
                 if investor_startups_by_sectors_result.status_code == 200:
-                    investor_startups_by_sectors_result = investor_startups_by_sectors_result.json()
-                    #print(investor_startups_by_sectors_result[0])
-                    #print(investor_startups_by_sectors_result[1])
+                    investor_startups_by_sectors_result = (
+                        investor_startups_by_sectors_result.json()
+                    )
+                    # print(investor_startups_by_sectors_result[0])
+                    # print(investor_startups_by_sectors_result[1])
 
-                    data = default_portfolio      
+                    data = default_portfolio
                     data = data["investment_summary"][0]
-                    data["total_investment"] = investment_total_result["amount"]["{}".format(investor_id)]
-                    data["total_startups"] = len(startups_invested_result["{}".format(investor_id)])
+                    data["total_investment"] = investment_total_result["amount"][
+                        "{}".format(investor_id)
+                    ]
+                    data["total_startups"] = len(
+                        startups_invested_result["{}".format(investor_id)]
+                    )
 
-                    #print(data["startups_by"][0]["labels"])
+                    # print(data["startups_by"][0]["labels"])
 
-                    data["startups_by"][0]["data"] = investor_startups_by_sectors_result[1]
-                    data["startups_by"][0]["labels"] = investor_startups_by_sectors_result[0]
-                    
-                    #calculate investor_agg_irr)
-                    year_instance = arw.now('Asia/Kolkata')
-                    no_of_quaters = math.ceil(year_instance.month/3.)
-                    investor_agg_irr = ([None] * no_of_quaters)
-      
-                    data["agg_net_irr_data"]["{}".format(now_year_India)] = investor_agg_irr
-            
+                    data["startups_by"][0][
+                        "data"
+                    ] = investor_startups_by_sectors_result[1]
+                    data["startups_by"][0][
+                        "labels"
+                    ] = investor_startups_by_sectors_result[0]
+
+                    # calculate investor_agg_irr)
+                    year_instance = arw.now("Asia/Kolkata")
+                    no_of_quaters = math.ceil(year_instance.month / 3.0)
+                    investor_agg_irr = [None] * no_of_quaters
+
+                    data["agg_net_irr_data"][
+                        "{}".format(now_year_India)
+                    ] = investor_agg_irr
+
                     return data
 
-
-                #When investor_startups_by_sectors_result is not 200     
+                # When investor_startups_by_sectors_result is not 200
                 else:
 
-                    data = default_portfolio      
+                    data = default_portfolio
                     data = data["investment_summary"][0]
-                    data["total_investment"] = investment_total_result["amount"]["{}".format(investor_id)]
-                    data["total_startups"] = len(startups_invested_result["{}".format(investor_id)])
-                    
-                    #calculate investor_agg_irr)
-                    year_instance = arw.now('Asia/Kolkata')
-                    no_of_quaters = math.ceil(year_instance.month/3.)
-                    investor_agg_irr = ([None] * no_of_quaters)
-      
-                    data["agg_net_irr_data"]["{}".format(now_year_India)] = investor_agg_irr
-                              
+                    data["total_investment"] = investment_total_result["amount"][
+                        "{}".format(investor_id)
+                    ]
+                    data["total_startups"] = len(
+                        startups_invested_result["{}".format(investor_id)]
+                    )
+
+                    # calculate investor_agg_irr)
+                    year_instance = arw.now("Asia/Kolkata")
+                    no_of_quaters = math.ceil(year_instance.month / 3.0)
+                    investor_agg_irr = [None] * no_of_quaters
+
+                    data["agg_net_irr_data"][
+                        "{}".format(now_year_India)
+                    ] = investor_agg_irr
+
                     return data
 
-            
-            #When investment_total_result is not 200    
+            # When investment_total_result is not 200
             else:
-                data = default_portfolio      
+                data = default_portfolio
                 data = data["investment_summary"][0]
-                data["total_investment"] = investment_total_result["amount"]["{}".format(investor_id)]
-                
-                #calculate investor_agg_irr)
-                year_instance = arw.now('Asia/Kolkata')
-                no_of_quaters = math.ceil(year_instance.month/3.)
-                investor_agg_irr = ([None] * no_of_quaters)
-      
+                data["total_investment"] = investment_total_result["amount"][
+                    "{}".format(investor_id)
+                ]
+
+                # calculate investor_agg_irr)
+                year_instance = arw.now("Asia/Kolkata")
+                no_of_quaters = math.ceil(year_instance.month / 3.0)
+                investor_agg_irr = [None] * no_of_quaters
+
                 data["agg_net_irr_data"]["{}".format(now_year_India)] = investor_agg_irr
-                 
+
                 return data
-           
-        #When investment_total_result is not 200    
+
+        # When investment_total_result is not 200
         else:
-            data = default_portfolio      
+            data = default_portfolio
             data = data["investment_summary"][0]
-            
-            #calculate investor_agg_irr)
-            year_instance = arw.now('Asia/Kolkata')
-            no_of_quaters = math.ceil(year_instance.month/3.)
-            investor_agg_irr = ([None] * no_of_quaters)
-      
+
+            # calculate investor_agg_irr)
+            year_instance = arw.now("Asia/Kolkata")
+            no_of_quaters = math.ceil(year_instance.month / 3.0)
+            investor_agg_irr = [None] * no_of_quaters
+
             data["agg_net_irr_data"]["{}".format(now_year_India)] = investor_agg_irr
-            
+
             return data
 
 
 investor_startup_summary = Blueprint("investor_startup_summary", __name__)
+
 
 @investor_startup_summary.route("/unity/v1/investor/startup_summary", methods=["GET"])
 def startup_summary():
     page = request.args.get("page")
     page_size = request.args.get("page_size")
     investor_id = request.args.get("investor_id")
+    startup_id = request.args.get("startup_id")
     header = request.headers.get("Authorization")
     access_token = get_token(header)
-    now_year_India = arw.now('Asia/Kolkata').year
-    
+    now_year_India = arw.now("Asia/Kolkata").year
 
-    startups_invested_result = requests.get(
-        base_url
-        + "/unity/v1/investor/startups_invested?"
-        + "page={}&page_size={}&investor_id={}".format(page, page_size, investor_id),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token),
-        },
-    )
+    if startup_id == None or startup_id == " " or startup_id == []:
 
+        startups_invested_result = requests.get(
+            base_url
+            + "/unity/v1/investor/startups_invested?"
+            + "page={}&page_size={}&investor_id={}".format(
+                page, page_size, investor_id
+            ),
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {}".format(access_token),
+            },
+        )
 
-    if startups_invested_result.json() == []:
-        return jsonify([])
+        if startups_invested_result.json() == []:
+            return jsonify([])
+
+        else:
+            data = default_portfolio
+            data = data["startup_summary"][0]
+            return data
 
     else:
-        data = default_portfolio 
-        data = data["startup_summary"][0]
-        return data
 
+        startup_investment_total_result = requests.get(
+            base_url
+            + "/unity/v1/investor/startup_investment_total?"
+            + "page={}&page_size={}&investor_id={}&startup_id={}".format(
+                page, page_size, investor_id, startup_id
+            ),
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {}".format(access_token),
+            },
+        )
+
+        startups_invested_result = requests.get(
+            base_url
+            + "/unity/v1/investor/startups_invested?"
+            + "page={}&page_size={}&investor_id={}".format(
+                page, page_size, investor_id
+            ),
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {}".format(access_token),
+            },
+        )
+        # print(startups_invested_result.json())
+        # print(startup_investment_total_result.json())
+
+        if startup_investment_total_result == None:
+
+            return jsonify([])
+
+        else:
+
+            startups_invested_data = startups_invested_result.json()
+            startup_investment_total_data = startup_investment_total_result.json()
+
+            data = default_portfolio
+            data = data["startup_summary"][0]
+            data["investment_time"] = startup_investment_total_data["investment_time"]
+            data["startup_id"] = startup_investment_total_data["startup_id"]
+            data["total_money_invested"] = startup_investment_total_data["total_money_invested"]
+            
+            
+            return data
 
 
 investor_investment_total = Blueprint("investor_investment_total", __name__)
+
 
 @investor_investment_total.route("/unity/v1/investor/investment_total", methods=["GET"])
 def investment_total():
@@ -222,7 +282,6 @@ def investment_total():
     year = request.args.get("year")
     header = request.headers.get("Authorization")
     access_token = get_token(header)
-    
 
     if year == None:
         result = requests.get(
@@ -267,7 +326,10 @@ def investment_total():
 
 investor_startups_invested = Blueprint("investor_startups_invested", __name__)
 
-@investor_startups_invested.route("/unity/v1/investor/startups_invested", methods=["GET"])
+
+@investor_startups_invested.route(
+    "/unity/v1/investor/startups_invested", methods=["GET"]
+)
 def startups_invested():
     page = request.args.get("page")
     page_size = request.args.get("page_size")
@@ -302,7 +364,6 @@ def startups_invested():
             },
         )
 
-
     if result.text == "[]":
         return jsonify([])
 
@@ -319,7 +380,10 @@ def startups_invested():
 
 investor_investor_startups = Blueprint("investor_investor_startups", __name__)
 
-@investor_investor_startups.route("/unity/v1/investor/investor_startups", methods=["GET"])
+
+@investor_investor_startups.route(
+    "/unity/v1/investor/investor_startups", methods=["GET"]
+)
 def investor_startups():
     page = request.args.get("page")
     page_size = request.args.get("page_size")
@@ -346,10 +410,9 @@ def investor_startups():
         },
     )
 
-
     if result.text == "[]":
         return jsonify([])
-    
+
     if startups.text == "[]":
         return jsonify([])
 
@@ -364,9 +427,13 @@ def investor_startups():
         startups_total = pd.merge(startups, data, on="startup_id")
         startups_array = startups_total[["investor_id", "startup_name", "startup_id"]]
 
-        startups_array = startups_array.groupby(by=["investor_id"])["startup_id"].unique()
+        startups_array = startups_array.groupby(by=["investor_id"])[
+            "startup_id"
+        ].unique()
 
-        data = pd.DataFrame(startups_array["{}".format(investor_id)], columns=["startup_id"])
+        data = pd.DataFrame(
+            startups_array["{}".format(investor_id)], columns=["startup_id"]
+        )
         data = data.replace([np.inf, -np.inf], np.nan)
         data = data.where(data.notnull(), None)
 
@@ -378,7 +445,10 @@ def investor_startups():
 
 investor_investments_month = Blueprint("investor_investments_month", __name__)
 
-@investor_investments_month.route("/unity/v1/investor/investments_month", methods=["GET"])
+
+@investor_investments_month.route(
+    "/unity/v1/investor/investments_month", methods=["GET"]
+)
 def investments_month():
     page = request.args.get("page")
     page_size = request.args.get("page_size")
@@ -413,12 +483,11 @@ def investments_month():
             },
         )
 
-
     if result.text == "[]":
         return jsonify([])
 
     else:
-        
+
         data = json.loads(result.text)
         data = pd.DataFrame(data)
         data = data.replace([np.inf, -np.inf], np.nan)
@@ -428,10 +497,14 @@ def investments_month():
         return data
 
 
+investor_investor_startups_by_sectors = Blueprint(
+    "investor_investor_startups_by_sectors", __name__
+)
 
-investor_investor_startups_by_sectors = Blueprint("investor_investor_startups_by_sectors", __name__)
 
-@investor_investor_startups_by_sectors.route("/unity/v1/investor/investor_startups_by_sectors", methods=["GET"])
+@investor_investor_startups_by_sectors.route(
+    "/unity/v1/investor/investor_startups_by_sectors", methods=["GET"]
+)
 def investor_startups_by_sectors():
     page = request.args.get("page")
     page_size = request.args.get("page_size")
@@ -458,49 +531,41 @@ def investor_startups_by_sectors():
         },
     )
 
-
     if result.text == "[]":
         return jsonify([])
-    
+
     if startups.text == "[]":
         return jsonify([])
 
     else:
         investment_data = json.loads(result.text)
         investment_data = pd.DataFrame(investment_data)
-    
 
         startups = json.loads(startups.text)
         startups = pd.DataFrame(startups)
-        startups = startups[["startup_name" , "startup_id" , "sectors"]]
-        
+        startups = startups[["startup_name", "startup_id", "sectors"]]
 
         startups_total = pd.merge(startups, investment_data, on="startup_id")
         # print(startups_total)
 
-        startups_array = startups_total[["startup_id" , "sectors"]]
+        startups_array = startups_total[["startup_id", "sectors"]]
         # print(startups_array)
 
-        
-
-
-        #startups_array = startups_array.groupby(by=["startup_id"])
+        # startups_array = startups_array.groupby(by=["startup_id"])
         startups_array = startups_array.groupby(by=["startup_id"])["sectors"].unique()
-        #startups_array.apply(print)
-        #print(startups_array)
-        #print(startups_array.reset_index(name='sectors'))
+        # startups_array.apply(print)
+        # print(startups_array)
+        # print(startups_array.reset_index(name='sectors'))
 
-        sectors_df = pd.DataFrame(startups_array.reset_index(name='sectors'))
-        #print(type(sectors_df["sectors"].iloc[0]))
+        sectors_df = pd.DataFrame(startups_array.reset_index(name="sectors"))
+        # print(type(sectors_df["sectors"].iloc[0]))
         x = sectors_df["sectors"].to_numpy()
-        
+
         z = []
         for i in x:
             i = i[0]
             z.append(i)
         # print(z)
-        
-        
 
         # print(x)
         # print(type(x))
@@ -509,25 +574,34 @@ def investor_startups_by_sectors():
 
         # print(sectors_df)
         # print(type(sectors_df))
-        #print(sectors_df['sectors'].value_counts())
+        # print(sectors_df['sectors'].value_counts())
 
-        df = sectors_df['sectors'].value_counts().rename_axis('sectors').reset_index(name='counts')
-      
-        df["counts"] = (100. * df["counts"] / df["counts"].sum()).round(0)
+        df = (
+            sectors_df["sectors"]
+            .value_counts()
+            .rename_axis("sectors")
+            .reset_index(name="counts")
+        )
 
-        #print(df)
+        df["counts"] = (100.0 * df["counts"] / df["counts"].sum()).round(0)
 
-        list_of_sectors = df['sectors'].tolist()
-        list_of_counts = df['counts'].tolist()
-     
+        # print(df)
 
-        #return list of sectors and list of counts as json    
-        return jsonify(list_of_sectors, list_of_counts)  
+        list_of_sectors = df["sectors"].tolist()
+        list_of_counts = df["counts"].tolist()
 
-         
-investor_startup_investment_total = Blueprint("investor_startup_investment_total", __name__)
+        # return list of sectors and list of counts as json
+        return jsonify(list_of_sectors, list_of_counts)
 
-@investor_startup_investment_total.route("/unity/v1/investor/startup_investment_total", methods=["GET"])
+
+investor_startup_investment_total = Blueprint(
+    "investor_startup_investment_total", __name__
+)
+
+
+@investor_startup_investment_total.route(
+    "/unity/v1/investor/startup_investment_total", methods=["GET"]
+)
 def startup_investment_total():
     page = request.args.get("page")
     page_size = request.args.get("page_size")
@@ -536,11 +610,10 @@ def startup_investment_total():
     year = request.args.get("year")
     header = request.headers.get("Authorization")
     access_token = get_token(header)
-    now_year_India = arw.now('Asia/Kolkata').year
-    now_India = arw.now('Asia/Kolkata')
-    tz_India_info = 'Asia/Kolkata'
-    
-    
+    now_year_India = arw.now("Asia/Kolkata").year
+    now_India = arw.now("Asia/Kolkata")
+    tz_India_info = "Asia/Kolkata"
+
     if year == None:
         result = requests.get(
             base_url
@@ -567,8 +640,8 @@ def startup_investment_total():
             },
         )
 
-    #print(result.text)
-    
+    # print(result.text)
+
     if result.text == "[]":
         return jsonify([])
 
@@ -577,103 +650,118 @@ def startup_investment_total():
         data = pd.DataFrame(data)
         data = data.replace([np.inf, -np.inf], np.nan)
         data = data.where(data.notnull(), None)
-        
+
         data_startup_invested = data[["startup_id", "campaign_id", "date", "amount"]]
-        
-        
-        
-        data_startup_invested = data_startup_invested.loc[data_startup_invested['startup_id'] == "{}".format(startup_id)]
+
+        data_startup_invested = data_startup_invested.loc[
+            data_startup_invested["startup_id"] == "{}".format(startup_id)
+        ]
         try:
-            data_startup_invested = data_startup_invested.sort_values(by = 'date', ascending = True)
+            data_startup_invested = data_startup_invested.sort_values(
+                by="date", ascending=True
+            )
         except:
             return jsonify([])
-        
-        #print(data_startup_invested)
-        
-        #Number of transactions made in the startup (shape[0] is the number of transactions)
+
+        # print(data_startup_invested)
+
+        # Number of transactions made in the startup (shape[0] is the number of transactions)
         startup_total_number_of_transactions = data_startup_invested.shape[0]
-        #print(startup_total_number_of_transactions)
-        
-        #Total amount invested in the startup
-        startup_total_amount = data_startup_invested.groupby(by=["startup_id"])["amount"].sum()
-        
-        try: 
+        # print(startup_total_number_of_transactions)
+
+        # Total amount invested in the startup
+        startup_total_amount = data_startup_invested.groupby(by=["startup_id"])[
+            "amount"
+        ].sum()
+
+        try:
             total_money_invested = startup_total_amount[0]
         except:
-            return jsonify([]) 
-            
-        #print(total_money_invested)
-        
-        #date first invested in a startup
-        #first_date = data_startup_invested['date'].min()
-        #print(first_date)
-        
-        #sort data by date
+            return jsonify([])
+
+        # print(total_money_invested)
+
+        # date first invested in a startup
+        # first_date = data_startup_invested['date'].min()
+        # print(first_date)
+
+        # sort data by date
         try:
-            data_startup_invested = data_startup_invested.sort_values(by = 'date', ascending = True)
+            data_startup_invested = data_startup_invested.sort_values(
+                by="date", ascending=True
+            )
         except:
             return jsonify([])
-        data_startup_invested['date'] = data_startup_invested['date'].apply(parser.parse)
-        
+        data_startup_invested["date"] = data_startup_invested["date"].apply(
+            parser.parse
+        )
+
         try:
-            first_date_of_transaction = data_startup_invested['date'].iloc[0]
+            first_date_of_transaction = data_startup_invested["date"].iloc[0]
         except:
             return jsonify([])
-        
-        #Converting pandas.tslib.Timestamp to datetime python object
-        
+
+        # Converting pandas.tslib.Timestamp to datetime python object
+
         first_date_of_transaction = first_date_of_transaction.to_pydatetime()
 
-        #print(data_startup_invested)
-        #print(first_date_of_transaction)
-        
-        
-        
+        # print(data_startup_invested)
+        # print(first_date_of_transaction)
+
         # add time zone to date string to get datetime object
-        #first_date_of_transaction = first_date_of_transaction + tz.tzoffset('IST', 19800)
-        
-        #print((first_date_of_transaction))
-        
-        first_date_of_transaction_with_timezone = first_date_of_transaction.astimezone(pytz.timezone('Asia/Calcutta'))
-        
- 
-        #print(type(first_date_of_transaction_with_timezone))
-        #print((first_date_of_transaction_with_timezone))
-        #data_startup_invested_parsed
-        
-      
-        now_India_dt = datetime.datetime.now(pytz.timezone('Asia/Calcutta'))
-        #print(now_India)
-        #print(now_India_dt)
-        
-        #calculate investment time in years and months since date of first transaction made in the startup 
-        investment_time_diff = relativedelta(now_India_dt, first_date_of_transaction_with_timezone)
-        investment_time_in_years_months_days = [investment_time_diff.years, investment_time_diff.months, investment_time_diff.days]
-        #print(investment_time_in_years_months_days)
-        
-        investment_time_in_days_diff = now_India_dt - first_date_of_transaction_with_timezone
-        investment_time_in_days =investment_time_in_days_diff.days
-        #print((investment_time_in_days))
-        
+        # first_date_of_transaction = first_date_of_transaction + tz.tzoffset('IST', 19800)
+
+        # print((first_date_of_transaction))
+
+        first_date_of_transaction_with_timezone = first_date_of_transaction.astimezone(
+            pytz.timezone("Asia/Calcutta")
+        )
+
+        # print(type(first_date_of_transaction_with_timezone))
+        # print((first_date_of_transaction_with_timezone))
+        # data_startup_invested_parsed
+
+        now_India_dt = datetime.datetime.now(pytz.timezone("Asia/Calcutta"))
+        # print(now_India)
+        # print(now_India_dt)
+
+        # calculate investment time in years and months since date of first transaction made in the startup
+        investment_time_diff = relativedelta(
+            now_India_dt, first_date_of_transaction_with_timezone
+        )
+        investment_time_in_years_months_days = [
+            investment_time_diff.years,
+            investment_time_diff.months,
+            investment_time_diff.days,
+        ]
+        # print(investment_time_in_years_months_days)
+
+        investment_time_in_days_diff = (
+            now_India_dt - first_date_of_transaction_with_timezone
+        )
+        investment_time_in_days = investment_time_in_days_diff.days
+        # print((investment_time_in_days))
+
         startup_summary_data = {
             "startup_id": "{}".format(startup_id),
-            "total_money_invested": 0.0, 
-            "investment_time": {"in_year_month_day": [], 
-                                "in_days": 0, 
-                                "startup_total_number_of_transactions": 0}
+            "total_money_invested": 0.0,
+            "investment_time": {
+                "in_year_month_day": [],
+                "in_days": 0,
+                "startup_total_number_of_transactions": 0,
+            },
         }
 
-        #print(type(investment_time_in_days))
-                
+        # print(type(investment_time_in_days))
+
         startup_summary_data["total_money_invested"] = float(total_money_invested)
-        startup_summary_data["investment_time"]["in_year_month_day"] = investment_time_in_years_months_days
+        startup_summary_data["investment_time"][
+            "in_year_month_day"
+        ] = investment_time_in_years_months_days
         startup_summary_data["investment_time"]["in_days"] = investment_time_in_days
-        startup_summary_data["investment_time"]["startup_total_number_of_transactions"] = int(startup_total_number_of_transactions)
-        
-        
-        
+        startup_summary_data["investment_time"][
+            "startup_total_number_of_transactions"
+        ] = int(startup_total_number_of_transactions)
+
         data = startup_summary_data
         return data
-       
-
-       

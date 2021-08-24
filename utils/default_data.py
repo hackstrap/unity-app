@@ -20,7 +20,7 @@ default_portfolio = {
             "current_investment_value": 0.0,
             "current_investment_value_bool": True,
             "startup_net_irr_bool": True,
-            "multiple": 0.0,
+            "startup_multiple": 0.0,
             "startup_net_irr_data": {},
             "investment_time": {"in_year_month_day": [], 
                                 "in_days": 0, 
