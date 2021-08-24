@@ -96,7 +96,11 @@ def revenue():
         data = json.loads(result.text)
         data = pd.DataFrame(data)
         data = data.fillna(value=np.nan)
-        data = data.sort_values(by="month", ascending=True)
+        
+        try:
+            data = data.sort_values(by="month", ascending=True)
+        except:
+            return jsonify([])
 
         #print(data)
 
@@ -120,15 +124,23 @@ def revenue():
         data = json.loads(result.text)
         data = pd.DataFrame(data)
         data = data.fillna(value=np.nan)
-        data = data.sort_values(by="month", ascending=True)
         
+        try:
+            data = data.sort_values(by="month", ascending=True)
+        except:
+            return jsonify([])
         
         
         expense = json.loads(expense.text)
         expense = pd.DataFrame(expense)
         
         expense = expense.fillna(value=np.nan)
-        expense= expense.sort_values(by="month", ascending=True)
+        
+        try:
+            expense= expense.sort_values(by="month", ascending=True)
+        except: 
+            return jsonify([])
+        
         #print(expense["total_cogs"])
        
         

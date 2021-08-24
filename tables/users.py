@@ -102,7 +102,11 @@ def users():
     elif revenue.text == "[]" or opex.text == "[]":
         users = json.loads(users.text)
         users = pd.DataFrame(users)
-        users = users.sort_values(by="month")
+        
+        try:
+            users = users.sort_values(by="month")
+        except:
+            return jsonify([])
 
 
         users["total_customers"] = (
@@ -140,12 +144,17 @@ def users():
     elif revenue.text == "[]":
         users = json.loads(users.text)
         users = pd.DataFrame(users)
-        users = users.sort_values(by="month")
-
+        try:
+            users = users.sort_values(by="month")
+        except:
+            return jsonify([])
+        
         opex = json.loads(opex.text)
-        opex = pd.DataFrame(opex)    
-        opex = opex.sort_values(by="month")
-
+        opex = pd.DataFrame(opex)
+        try:    
+            opex = opex.sort_values(by="month")
+        except:
+            return jsonify([])
 
 
         users["total_customers"] = (
@@ -201,17 +210,26 @@ def users():
         users = json.loads(users.text)
         users = pd.DataFrame(users)
         users = users.fillna(0)
-        users = users.sort_values(by="month")
+        try:
+            users = users.sort_values(by="month")
+        except:
+            return jsonify([])
 
         revenue = json.loads(revenue.text)
         revenue = pd.DataFrame(revenue)
         revenue = revenue.fillna(0)
-        revenue = revenue.sort_values(by="month")
-
+        try:
+            revenue = revenue.sort_values(by="month")
+        except:
+            return jsonify([])
+        
         opex = json.loads(opex.text)
         opex = pd.DataFrame(opex)
         opex = opex.fillna(0)
-        opex = opex.sort_values(by="month")
+        try:
+            opex = opex.sort_values(by="month")
+        except:
+            return jsonify([])
 
 
 

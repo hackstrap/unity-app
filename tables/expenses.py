@@ -81,7 +81,11 @@ def expenses():
         # print(result.text)
         data = pd.DataFrame(data)
         data = data.fillna(value=np.nan)
-        data = data.sort_values(by="month", ascending=True)
+        
+        try:
+            data = data.sort_values(by="month", ascending=True)
+        except:
+            return jsonify([])
         #print(data)
        
 

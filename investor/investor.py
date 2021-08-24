@@ -583,7 +583,10 @@ def startup_investment_total():
         
         
         data_startup_invested = data_startup_invested.loc[data_startup_invested['startup_id'] == "{}".format(startup_id)]
-        data_startup_invested = data_startup_invested.sort_values(by = 'date', ascending = True)
+        try:
+            data_startup_invested = data_startup_invested.sort_values(by = 'date', ascending = True)
+        except:
+            return jsonify([])
         
         #print(data_startup_invested)
         
@@ -597,7 +600,7 @@ def startup_investment_total():
         try: 
             total_money_invested = startup_total_amount[0]
         except:
-            return "Index Error Exception Raised in total_money_invested"
+            return jsonify([]) 
             
         #print(total_money_invested)
         
@@ -606,13 +609,16 @@ def startup_investment_total():
         #print(first_date)
         
         #sort data by date
-        data_startup_invested = data_startup_invested.sort_values(by = 'date', ascending = True)
+        try:
+            data_startup_invested = data_startup_invested.sort_values(by = 'date', ascending = True)
+        except:
+            return jsonify([])
         data_startup_invested['date'] = data_startup_invested['date'].apply(parser.parse)
         
         try:
             first_date_of_transaction = data_startup_invested['date'].iloc[0]
         except:
-            return "Index Error Exception Raised in first_date_of_transaction"
+            return jsonify([])
         
         #Converting pandas.tslib.Timestamp to datetime python object
         
