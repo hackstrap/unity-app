@@ -2,7 +2,7 @@ import datetime
 import json
 import math
 from datetime import datetime
-
+import datetime
 import arrow as arw
 import numpy as np
 import pandas as pd
@@ -89,6 +89,19 @@ def investment_summary():
                 "Authorization": "Bearer {}".format(access_token),
             },
         )
+        
+        investments_result = requests.get(
+            base_url
+            + "v1/investment?"
+            + "page={}&page_size={}&investor_id={}".format(
+                page, page_size, investor_id
+            ),
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {}".format(access_token),
+            },
+        )
+
 
         if investment_total_result.status_code == 200:
             investment_total_result = investment_total_result.json()
@@ -104,35 +117,55 @@ def investment_summary():
                     )
                     # print(investor_startups_by_sectors_result[0])
                     # print(investor_startups_by_sectors_result[1])
+                    
+                    if investments_result.status_code == 200:
+                        investments_result = investments_result.text
+                        investments_result = json.loads(investments_result)
+                        investments_result = pd.DataFrame(investments_result)
+                        print(investments_result)
+                        investments_result["date"] = investments_result["date"].apply(parser.parse)
+                        print(investments_result)
+                        print(type(investments_result["date"]))
+                        
+                        #investments_result["date"] = investments_result["date"].tz_localize("Asia/Calcutta")
+                        #print(investments_result)
+                        data = default_portfolio
+                        data = data["investment_summary"][0]
+                        return data
+                    
+                    
+                    
+                    # When investments_result is not 200    
+                    else:
+                        
+                        data = default_portfolio
+                        data = data["investment_summary"][0]
+                        data["total_investment"] = investment_total_result["amount"][
+                            "{}".format(investor_id)
+                        ]
+                        data["total_startups"] = len(
+                            startups_invested_result["{}".format(investor_id)]
+                        )
 
-                    data = default_portfolio
-                    data = data["investment_summary"][0]
-                    data["total_investment"] = investment_total_result["amount"][
-                        "{}".format(investor_id)
-                    ]
-                    data["total_startups"] = len(
-                        startups_invested_result["{}".format(investor_id)]
-                    )
+                        # print(data["startups_by"][0]["labels"])
 
-                    # print(data["startups_by"][0]["labels"])
+                        data["startups_by"][0][
+                            "data"
+                        ] = investor_startups_by_sectors_result[1]
+                        data["startups_by"][0][
+                            "labels"
+                        ] = investor_startups_by_sectors_result[0]
 
-                    data["startups_by"][0][
-                        "data"
-                    ] = investor_startups_by_sectors_result[1]
-                    data["startups_by"][0][
-                        "labels"
-                    ] = investor_startups_by_sectors_result[0]
+                        # calculate investor_agg_irr)
+                        year_instance = arw.now("Asia/Kolkata")
+                        no_of_quaters = math.ceil(year_instance.month / 3.0)
+                        investor_agg_irr = [None] * no_of_quaters
 
-                    # calculate investor_agg_irr)
-                    year_instance = arw.now("Asia/Kolkata")
-                    no_of_quaters = math.ceil(year_instance.month / 3.0)
-                    investor_agg_irr = [None] * no_of_quaters
+                        data["agg_net_irr_data"][
+                            "{}".format(now_year_India)
+                        ] = investor_agg_irr
 
-                    data["agg_net_irr_data"][
-                        "{}".format(now_year_India)
-                    ] = investor_agg_irr
-
-                    return data
+                        return data
 
                 # When investor_startups_by_sectors_result is not 200
                 else:
@@ -250,15 +283,15 @@ def startup_summary():
             },
         )
         # print(startups_invested_result.json())
-        # print(startup_investment_total_result.json())
+        print(startup_investment_total_result.text)
 
         if startup_investment_total_result == None:
-
             return jsonify([])
 
         else:
 
             startups_invested_data = startups_invested_result.json()
+            #print(startups_invested_data)
             startup_investment_total_data = startup_investment_total_result.json()
 
             data = default_portfolio
@@ -648,14 +681,19 @@ def startup_investment_total():
     else:
         data = json.loads(result.text)
         data = pd.DataFrame(data)
-        data = data.replace([np.inf, -np.inf], np.nan)
-        data = data.where(data.notnull(), None)
+        #data = data.replace([np.inf, -np.inf], np.nan)
+        #data = data.where(data.notnull(), None)
 
         data_startup_invested = data[["startup_id", "campaign_id", "date", "amount"]]
 
-        data_startup_invested = data_startup_invested.loc[
-            data_startup_invested["startup_id"] == "{}".format(startup_id)
-        ]
+        try:
+            data_startup_invested = data_startup_invested.loc[
+                data_startup_invested["startup_id"] == "{}".format(startup_id)
+            ]
+        except:
+            return jsonify([])
+        
+        
         try:
             data_startup_invested = data_startup_invested.sort_values(
                 by="date", ascending=True
@@ -663,7 +701,7 @@ def startup_investment_total():
         except:
             return jsonify([])
 
-        # print(data_startup_invested)
+        #print(data_startup_invested)
 
         # Number of transactions made in the startup (shape[0] is the number of transactions)
         startup_total_number_of_transactions = data_startup_invested.shape[0]
@@ -675,14 +713,14 @@ def startup_investment_total():
         ].sum()
 
         try:
-            total_money_invested = startup_total_amount[0]
+             total_money_invested = startup_total_amount[0]
         except:
             return jsonify([])
 
         # print(total_money_invested)
 
         # date first invested in a startup
-        # first_date = data_startup_invested['date'].min()
+        #first_date = data_startup_invested['date'].min()
         # print(first_date)
 
         # sort data by date
@@ -692,14 +730,15 @@ def startup_investment_total():
             )
         except:
             return jsonify([])
-        data_startup_invested["date"] = data_startup_invested["date"].apply(
-            parser.parse
-        )
+        
+        #print(data_startup_invested)
+        
+        data_startup_invested["date"] = data_startup_invested["date"].apply(parser.parse)
 
         try:
             first_date_of_transaction = data_startup_invested["date"].iloc[0]
         except:
-            return jsonify([])
+             return jsonify([])
 
         # Converting pandas.tslib.Timestamp to datetime python object
 
@@ -722,8 +761,8 @@ def startup_investment_total():
         # data_startup_invested_parsed
 
         now_India_dt = datetime.datetime.now(pytz.timezone("Asia/Calcutta"))
-        # print(now_India)
-        # print(now_India_dt)
+        #print(now_India)
+        #print(now_India_dt)
 
         # calculate investment time in years and months since date of first transaction made in the startup
         investment_time_diff = relativedelta(
@@ -733,7 +772,7 @@ def startup_investment_total():
             investment_time_diff.years,
             investment_time_diff.months,
             investment_time_diff.days,
-        ]
+         ]
         # print(investment_time_in_years_months_days)
 
         investment_time_in_days_diff = (
