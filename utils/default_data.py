@@ -5,6 +5,11 @@ default_portfolio = {
             "total_investment": None,
             "current_total_investment_value": None,
             "agg_net_irr_data": {},
+            "total_transactions": {
+                "all_transactions": None,
+                "last_three_months": None,
+                "this_year": None,
+                },
             "startups_by": [{"filter": "By Sector", "data": [], "labels": []}],
             "aggregate_multiple": None,
             "total_startups": 0,
@@ -22,9 +27,11 @@ default_portfolio = {
             "startup_net_irr_bool": True,
             "startup_multiple": 0.0,
             "startup_net_irr_data": {},
-            "investment_time": {"in_year_month_day": [], 
-                                "in_days": 0, 
-                                "startup_total_number_of_transactions": 0},
+            "investment_time": {
+                "in_year_month_day": [],
+                "in_days": 0,
+                "startup_total_number_of_transactions": 0,
+            },
             "organization": [
                 {
                     "fees": 0.0,
@@ -42,20 +49,7 @@ default_portfolio = {
 
 default_valuation = {
     "startup_id": "startup-1slug",
-    "valuation_chart": [
-        {
-            "min": 2.25,
-            "max": 3.68,
-            "name": "Transactions Comparable"
-        }
-    ],
+    "valuation_chart": [{"min": None, "max": None, "name": None}],
     "valuation_bool": True,
-    "valuation_data": {
-        "2020": [
-            2.25,
-            3.25,
-            4.8,
-            6
-        ]
-    }
+    "valuation_data": {"2021": [None, None, None, None]},
 }
