@@ -129,8 +129,37 @@ def investment_summary():
                         
                         #investments_result["date"] = investments_result["date"].tz_localize("Asia/Calcutta")
                         #print(investments_result)
+                        
+                        
+                        
                         data = default_portfolio
                         data = data["investment_summary"][0]
+                        data["total_investment"] = investment_total_result["amount"][
+                            "{}".format(investor_id)
+                        ]
+                        data["total_startups"] = len(
+                            startups_invested_result["{}".format(investor_id)]
+                        )
+
+                        # print(data["startups_by"][0]["labels"])
+
+                        data["startups_by"][0][
+                            "data"
+                        ] = investor_startups_by_sectors_result[1]
+                        data["startups_by"][0][
+                            "labels"
+                        ] = investor_startups_by_sectors_result[0]
+
+                        # calculate investor_agg_irr)
+                        year_instance = arw.now("Asia/Kolkata")
+                        no_of_quaters = math.ceil(year_instance.month / 3.0)
+                        investor_agg_irr = [None] * no_of_quaters
+
+                        data["agg_net_irr_data"][
+                            "{}".format(now_year_India)
+                        ] = investor_agg_irr
+                        
+                        
                         return data
                     
                     
@@ -283,7 +312,7 @@ def startup_summary():
             },
         )
         # print(startups_invested_result.json())
-        print(startup_investment_total_result.text)
+        #print(startup_investment_total_result.text)
 
         if startup_investment_total_result == None:
             return jsonify([])
