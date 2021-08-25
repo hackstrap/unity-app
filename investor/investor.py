@@ -2,7 +2,7 @@ import datetime
 import json
 import math
 from datetime import datetime
-import datetime
+
 import arrow as arw
 import numpy as np
 import pandas as pd
@@ -50,6 +50,7 @@ def investment_summary():
     header = request.headers.get("Authorization")
     access_token = get_token(header)
     now_year_India = arw.now("Asia/Kolkata").year
+    now_month_India = arw.now("Asia/Kolkata").month
 
     startups_invested_result = requests.get(
         base_url
@@ -89,7 +90,7 @@ def investment_summary():
                 "Authorization": "Bearer {}".format(access_token),
             },
         )
-        
+
         investments_result = requests.get(
             base_url
             + "v1/investment?"
@@ -101,7 +102,6 @@ def investment_summary():
                 "Authorization": "Bearer {}".format(access_token),
             },
         )
-
 
         if investment_total_result.status_code == 200:
             investment_total_result = investment_total_result.json()
@@ -117,21 +117,68 @@ def investment_summary():
                     )
                     # print(investor_startups_by_sectors_result[0])
                     # print(investor_startups_by_sectors_result[1])
-                    
+
                     if investments_result.status_code == 200:
                         investments_result = investments_result.text
                         investments_result = json.loads(investments_result)
                         investments_result = pd.DataFrame(investments_result)
-                        print(investments_result)
-                        investments_result["date"] = investments_result["date"].apply(parser.parse)
-                        print(investments_result)
-                        print(type(investments_result["date"]))
-                        
-                        #investments_result["date"] = investments_result["date"].tz_localize("Asia/Calcutta")
-                        #print(investments_result)
-                        
-                        
-                        
+
+                        # Get datetime from mongoDB and convert it to local time
+                        try:
+                            investments_result["date"] = investments_result[
+                                "date"
+                            ].apply(parser.parse)
+                        except:
+                            return jsonify([])
+                        # print(investments_result)
+
+                        investments_result["date"] = investments_result[
+                            "date"
+                        ].dt.tz_convert(None)
+
+                        # print(investments_result)
+
+                        investments_result["date"] = investments_result[
+                            "date"
+                        ].dt.tz_localize("Asia/Kolkata")
+
+                        # print((investments_result["date"].iloc[0]))
+
+                        investments_data = investments_result
+
+                        try:
+                            all_transactions = investments_data.shape[0]
+                        except:
+                            all_transactions = None
+                        # print(type(all_transactions))
+
+                        # print(investments_data)
+
+                        investments_data_this_year = investments_data[
+                            investments_data["date"].dt.year == now_year_India
+                        ]
+
+                        try:
+                            this_year = investments_data_this_year.shape[0]
+                        except:
+                            this_year = None
+                        # print(type(this_year))
+
+                        try:
+                            last_three_months_data = investments_data_this_year[
+                                investments_data_this_year["date"].dt.month.isin(
+                                    [
+                                        now_month_India - 1,
+                                        now_month_India - 2,
+                                        now_month_India - 3,
+                                    ]
+                                )
+                            ]
+                            last_three_months = last_three_months_data.shape[0]
+                        except:
+                            last_three_months = None
+                        # print(type(last_three_months))
+
                         data = default_portfolio
                         data = data["investment_summary"][0]
                         data["total_investment"] = investment_total_result["amount"][
@@ -158,15 +205,20 @@ def investment_summary():
                         data["agg_net_irr_data"][
                             "{}".format(now_year_India)
                         ] = investor_agg_irr
-                        
-                        
+
+                        data["total_transactions"][
+                            "all_transactions"
+                        ] = all_transactions
+                        data["total_transactions"][
+                            "last_three_months"
+                        ] = last_three_months
+                        data["total_transactions"]["this_year"] = this_year
+
                         return data
-                    
-                    
-                    
-                    # When investments_result is not 200    
+
+                    # When investments_result is not 200
                     else:
-                        
+
                         data = default_portfolio
                         data = data["investment_summary"][0]
                         data["total_investment"] = investment_total_result["amount"][
@@ -312,7 +364,7 @@ def startup_summary():
             },
         )
         # print(startups_invested_result.json())
-        #print(startup_investment_total_result.text)
+        # print(startup_investment_total_result.text)
 
         if startup_investment_total_result == None:
             return jsonify([])
@@ -320,16 +372,17 @@ def startup_summary():
         else:
 
             startups_invested_data = startups_invested_result.json()
-            #print(startups_invested_data)
+            # print(startups_invested_data)
             startup_investment_total_data = startup_investment_total_result.json()
 
             data = default_portfolio
             data = data["startup_summary"][0]
             data["investment_time"] = startup_investment_total_data["investment_time"]
             data["startup_id"] = startup_investment_total_data["startup_id"]
-            data["total_money_invested"] = startup_investment_total_data["total_money_invested"]
-            
-            
+            data["total_money_invested"] = startup_investment_total_data[
+                "total_money_invested"
+            ]
+
             return data
 
 
@@ -710,8 +763,8 @@ def startup_investment_total():
     else:
         data = json.loads(result.text)
         data = pd.DataFrame(data)
-        #data = data.replace([np.inf, -np.inf], np.nan)
-        #data = data.where(data.notnull(), None)
+        # data = data.replace([np.inf, -np.inf], np.nan)
+        # data = data.where(data.notnull(), None)
 
         data_startup_invested = data[["startup_id", "campaign_id", "date", "amount"]]
 
@@ -721,8 +774,7 @@ def startup_investment_total():
             ]
         except:
             return jsonify([])
-        
-        
+
         try:
             data_startup_invested = data_startup_invested.sort_values(
                 by="date", ascending=True
@@ -730,7 +782,7 @@ def startup_investment_total():
         except:
             return jsonify([])
 
-        #print(data_startup_invested)
+        # print(data_startup_invested)
 
         # Number of transactions made in the startup (shape[0] is the number of transactions)
         startup_total_number_of_transactions = data_startup_invested.shape[0]
@@ -742,14 +794,14 @@ def startup_investment_total():
         ].sum()
 
         try:
-             total_money_invested = startup_total_amount[0]
+            total_money_invested = startup_total_amount[0]
         except:
             return jsonify([])
 
         # print(total_money_invested)
 
         # date first invested in a startup
-        #first_date = data_startup_invested['date'].min()
+        # first_date = data_startup_invested['date'].min()
         # print(first_date)
 
         # sort data by date
@@ -759,19 +811,33 @@ def startup_investment_total():
             )
         except:
             return jsonify([])
-        
-        #print(data_startup_invested)
-        
-        data_startup_invested["date"] = data_startup_invested["date"].apply(parser.parse)
+
+        # print(data_startup_invested)
+
+        data_startup_invested["date"] = data_startup_invested["date"].apply(
+            parser.parse
+        )
+
+        data_startup_invested["date"] = data_startup_invested["date"].dt.tz_convert(
+            None
+        )
+
+        print(data_startup_invested)
+
+        data_startup_invested["date"] = data_startup_invested["date"].dt.tz_localize(
+            "Asia/Kolkata"
+        )
+
+        print(data_startup_invested)
 
         try:
             first_date_of_transaction = data_startup_invested["date"].iloc[0]
         except:
-             return jsonify([])
+            return jsonify([])
 
         # Converting pandas.tslib.Timestamp to datetime python object
 
-        first_date_of_transaction = first_date_of_transaction.to_pydatetime()
+        # first_date_of_transaction = first_date_of_transaction.to_pydatetime()
 
         # print(data_startup_invested)
         # print(first_date_of_transaction)
@@ -786,12 +852,12 @@ def startup_investment_total():
         )
 
         # print(type(first_date_of_transaction_with_timezone))
-        # print((first_date_of_transaction_with_timezone))
+        print((first_date_of_transaction_with_timezone))
         # data_startup_invested_parsed
 
-        now_India_dt = datetime.datetime.now(pytz.timezone("Asia/Calcutta"))
-        #print(now_India)
-        #print(now_India_dt)
+        now_India_dt = now_India.astimezone(pytz.timezone("Asia/Calcutta"))
+        #print(type(now_India))
+        #print(type(now_India_dt))
 
         # calculate investment time in years and months since date of first transaction made in the startup
         investment_time_diff = relativedelta(
@@ -801,7 +867,7 @@ def startup_investment_total():
             investment_time_diff.years,
             investment_time_diff.months,
             investment_time_diff.days,
-         ]
+        ]
         # print(investment_time_in_years_months_days)
 
         investment_time_in_days_diff = (
