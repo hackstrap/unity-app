@@ -94,8 +94,8 @@ def revenue():
         return jsonify([])
     
     else:
-        
-        if len(expense.text) > 2: 
+        #print(len(expense.text))
+        if len(expense.text) < 4: 
   
             data = json.loads(result.text)
             data = pd.DataFrame(data)
