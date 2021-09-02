@@ -90,81 +90,92 @@ def revenue():
     #--------------
 
     if result.text == "[]":
+        #print("Block1")
         return jsonify([])
-
-    elif expense.text == "[]":
-        data = json.loads(result.text)
-        data = pd.DataFrame(data)
-        data = data.fillna(value=np.nan)
-        
-        try:
-            data = data.sort_values(by="month", ascending=True)
-        except:
-            return jsonify([])
-
-        #print(data)
-
-        data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
-        
-        data["total_revenue_gr"] = helpers.pct_change(data["total_revenue"])
-        data["total_mrr_gr"] = helpers.pct_change(data["total_mrr"])
-        
-
-        data = data.replace([np.inf, -np.inf], np.nan)
-        #data = data.fillna(0)
-        data = data.round(4)
-        data = data.where(data.notnull(), None)
-        
-        data = data.to_dict("records")
-        data = json.dumps(data)
-        return data
-
-
+    
     else:
-        data = json.loads(result.text)
-        data = pd.DataFrame(data)
-        data = data.fillna(value=np.nan)
         
-        try:
-            data = data.sort_values(by="month", ascending=True)
-        except:
-            return jsonify([])
+        if len(expense.text) > 2: 
+  
+            data = json.loads(result.text)
+            data = pd.DataFrame(data)
+            data = data.fillna(value=np.nan)
+            
+            try:
+                data = data.sort_values(by="month", ascending=True)
+            except:
+                #print("Block2")
+                return jsonify([])
+
+            #print(data)
+
+            data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
+            
+            data["total_revenue_gr"] = helpers.pct_change(data["total_revenue"])
+            data["total_mrr_gr"] = helpers.pct_change(data["total_mrr"])
+            
+
+            data = data.replace([np.inf, -np.inf], np.nan)
+            #data = data.fillna(0)
+            data = data.round(4)
+            data = data.where(data.notnull(), None)
+            
+            data = data.to_dict("records")
+            data = json.dumps(data)
+            #print("Block3")
+            return data
+
+
+        else:
+            
+            data = json.loads(result.text)
+            data = pd.DataFrame(data)
+            data = data.fillna(value=np.nan)
+            
+            try:
+                data = data.sort_values(by="month", ascending=True)
+            except:
+                #print("Block4")
+                return jsonify([])
+            
+            
+            expense = json.loads(expense.text)
+            
+            expense = pd.DataFrame(expense)
+            
+            expense = expense.fillna(value=np.nan)
+            
+            try:
+                expense= expense.sort_values(by="month", ascending=True)
+            except:
+                #print("Block5") 
+                return jsonify([])
+            
+            #print(expense["total_cogs"])
+        
+            
+            data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
+        
+            data["total_revenue_gr"] = helpers.pct_change(data["total_revenue"])
+            data["total_mrr_gr"] = helpers.pct_change(data["total_mrr"])
+        
+            
         
         
-        expense = json.loads(expense.text)
-        expense = pd.DataFrame(expense)
-        
-        expense = expense.fillna(value=np.nan)
-        
-        try:
-            expense= expense.sort_values(by="month", ascending=True)
-        except: 
-            return jsonify([])
-        
-        #print(expense["total_cogs"])
-       
-        
-        data["total_revenue"] = data["total_mrr"] + data["total_non_recurring_revenue"]
-       
-        data["total_revenue_gr"] = helpers.pct_change(data["total_revenue"])
-        data["total_mrr_gr"] = helpers.pct_change(data["total_mrr"])
-       
-        
-      
-       
-        #print(data["total_revenue"])
-        print(expense["total_cogs"])
-        
-        data["gross_profit_margin"] = (
-            (data["total_revenue"].fillna(0) - expense["total_cogs"].fillna(0)) / data["total_revenue"].fillna(0)
-        ) * 100
-        
-        #print(data["gross_profit_margin"])
-        
-        data = data.replace([np.inf, -np.inf], np.nan)
-        data = data.round(4)
-        data = data.where(data.notnull(), None)
-        
-        data = data.to_dict("records")
-        data = json.dumps(data)
-        return data
+            #print(data["total_revenue"])
+            #print(expense["total_cogs"])
+            
+            data["gross_profit_margin"] = (
+                (data["total_revenue"].fillna(0) - expense["total_cogs"].fillna(0)) / data["total_revenue"].fillna(0)
+            ) * 100
+            
+            #print(data["gross_profit_margin"])
+            
+            data = data.replace([np.inf, -np.inf], np.nan)
+            data = data.round(4)
+            data = data.where(data.notnull(), None)
+            
+            data = data.to_dict("records")
+            data = json.dumps(data)
+            #print("Block6")
+            return data
