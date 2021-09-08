@@ -117,15 +117,16 @@ def users():
         - users["total_customers_churned"]
     )
         
-        users["total_registered_users_gr"] = helpers.pct_change(users["total_registered_users"])
         
+        
+        users["total_registered_users_gr"] = helpers.pct_change(users["total_registered_users"])
+        users["total_monthly_active_users_gr"] = helpers.pct_change(users["total_monthly_active_users"])
         
     #     (
     #     users["total_registered_users"].pct_change().fillna(0) * 100
     # )
         
         
-        users["total_monthly_active_users_gr"] = helpers.pct_change(users["total_monthly_active_users"])
         
         
     #     (
@@ -178,9 +179,12 @@ def users():
         + users["total_new_customers_acquired"]
         - users["total_customers_churned"]
     )
-        users["total_monthly_active_users_gr"] = (
-        users["total_monthly_active_users"].pct_change().fillna(0) * 100
-    )
+        
+        
+        users["total_registered_users_gr"] = helpers.pct_change(users["total_registered_users"])
+        users["total_monthly_active_users_gr"] = helpers.pct_change(users["total_monthly_active_users"])
+        
+        
         users["customer_churn_rate"] = (
         users["total_customers_churned"] / users["total_customers_at_beginning_of_month"]
         ).fillna(0) * 100
@@ -254,9 +258,9 @@ def users():
         + users["total_new_customers_acquired"]
         - users["total_customers_churned"]
     )
-        users["total_monthly_active_users_gr"] = (
-        users["total_monthly_active_users"].pct_change().fillna(0) * 100
-    )
+        users["total_registered_users_gr"] = helpers.pct_change(users["total_registered_users"])
+        users["total_monthly_active_users_gr"] = helpers.pct_change(users["total_monthly_active_users"])
+    
         users["customer_churn_rate"] = (
         users["total_customers_churned"] / users["total_customers_at_beginning_of_month"]
         ).fillna(0) * 100
