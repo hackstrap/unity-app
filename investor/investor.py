@@ -899,3 +899,44 @@ def startup_investment_total():
 
         data = startup_summary_data
         return data
+    
+
+
+investor_startup_investors = Blueprint("investor_startup_investors", __name__)
+
+
+@investor_startup_investors.route(
+    "/unity/v1/investor/startup_investors", methods=["GET"]
+)
+def startup_investors():
+    page = request.args.get("page")
+    page_size = request.args.get("page_size")
+    #investor_id = request.args.get("investor_id")
+    startup_id = request.args.get("startup_id")
+    year = request.args.get("year")
+    header = request.headers.get("Authorization")
+    access_token = get_token(header)
+
+    result = requests.get(
+        base_url
+        + "v1/investment?"
+        + "page={}&page_size={}&startup_id={}".format(page, page_size, startup_id),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {}".format(access_token),
+        },
+    )
+    if result.text == "[]":
+        return jsonify([])
+    
+    else:
+        
+        data = json.loads(result.text)
+        data = pd.DataFrame(data)
+        
+        data = data["investor_id"].unique()
+        data = data.tolist()
+        data = json.dumps(data)
+        #data = jsonify(data)
+        #print(type(data))
+        return data
