@@ -937,5 +937,6 @@ def startup_investors():
         data = data["investor_id"].unique()
         data = data.tolist()
         data = json.dumps(data)
-       
+        #data = jsonify(data)
+        #print(type(data))
         return data
