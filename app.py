@@ -28,6 +28,8 @@ from investor.investor import investor_investments_month
 from investor.investor import investor_investor_startups_by_sectors
 from investor.investor import investor_startup_investors
 
+from api.api import api_market_overview
+
 
 #startups
 from startups.tyke.test import test_rev
@@ -69,6 +71,8 @@ app.register_blueprint(investor_investor_startups)
 app.register_blueprint(investor_investments_month)
 app.register_blueprint(investor_investor_startups_by_sectors)
 app.register_blueprint(investor_startup_investors)
+
+app.register_blueprint(api_market_overview)
 
 app.register_blueprint(test_rev)
 app.register_blueprint(tables_product)
