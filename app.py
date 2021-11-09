@@ -4,39 +4,35 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import requests
-
 from flask import Flask, jsonify, request
 from flask_cors import CORS, cross_origin
-
 from requests.api import get
 from requests.exceptions import HTTPError
 from rich.console import Console
+
 console = Console()
 
-from tables.revenue import tables_revenue
-from tables.expenses import tables_expenses
-from tables.users import tables_users
-from tables.opex import tables_opex
-
-from investor.investor import investor_investment_summary
-from investor.investor import investor_startup_summary
-from investor.investor import investor_investment_total
-from investor.investor import investor_startup_investment_total
-from investor.investor import investor_startups_invested
-from investor.investor import investor_investor_startups
-from investor.investor import investor_investments_month
-from investor.investor import investor_investor_startups_by_sectors
-from investor.investor import investor_startup_investors
-
 from api.api import api_market_overview
-
-
-#startups
-from startups.tyke.test import test_rev
+from api.file_upload import api_file_upload
+from investor.investor import (
+    investor_investment_summary,
+    investor_investment_total,
+    investor_investments_month,
+    investor_investor_startups,
+    investor_investor_startups_by_sectors,
+    investor_startup_investment_total,
+    investor_startup_investors,
+    investor_startup_summary,
+    investor_startups_invested,
+)
 from startups.tyke.product import tables_product
 
-
-
+# startups
+from startups.tyke.test import test_rev
+from tables.expenses import tables_expenses
+from tables.opex import tables_opex
+from tables.revenue import tables_revenue
+from tables.users import tables_users
 
 base_url = "https://blink.hackstrap.com/"
 
@@ -51,12 +47,10 @@ def get_token(header):
     return token
 
 
-
-
 app = Flask(__name__)
 CORS(app)
 
-    
+
 app.register_blueprint(tables_revenue)
 app.register_blueprint(tables_expenses)
 app.register_blueprint(tables_users)
@@ -73,6 +67,7 @@ app.register_blueprint(investor_investor_startups_by_sectors)
 app.register_blueprint(investor_startup_investors)
 
 app.register_blueprint(api_market_overview)
+app.register_blueprint(api_file_upload)
 
 app.register_blueprint(test_rev)
 app.register_blueprint(tables_product)
