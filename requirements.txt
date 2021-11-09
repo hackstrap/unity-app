@@ -55,3 +55,6 @@ urllib3==1.26.4
 Werkzeug==2.0.1
 wrapt==1.12.1
 yarg==0.1.9
+xlrd==2.0.1
+et-xmlfile==1.1.0 
+openpyxl==3.0.9
