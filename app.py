@@ -14,6 +14,7 @@ console = Console()
 
 from api.api import api_market_overview
 from api.file_upload import api_file_upload
+from api.quickbooks_upload import api_quickbooks_upload, quickbooks_upload
 from investor.investor import (
     investor_investment_summary,
     investor_investment_total,
@@ -68,6 +69,7 @@ app.register_blueprint(investor_startup_investors)
 
 app.register_blueprint(api_market_overview)
 app.register_blueprint(api_file_upload)
+app.register_blueprint(api_quickbooks_upload)
 
 app.register_blueprint(test_rev)
 app.register_blueprint(tables_product)
